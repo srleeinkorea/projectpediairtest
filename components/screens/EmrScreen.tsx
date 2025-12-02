@@ -61,13 +61,14 @@ const TrafficLightFace: React.FC<{
 };
 
 /** 앱 로고 */
+
 const AppLogo: React.FC = () => (
-  <div className="flex flex-row items-center space-x-2.5 select-none">
+  <div className="flex flex-row items-center space-x-3 select-none">
     {/* 아이콘 영역 */}
-    <div className="relative w-11 h-11 flex-shrink-0">
+    <div className="relative w-14 h-14 flex-shrink-0">
       <div className="absolute -inset-0.5 bg-gradient-to-br from-sky-300/30 via-cyan-200/25 to-indigo-300/25 rounded-full blur-sm" />
-      <div className="relative w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-100 via-sky-50 to-indigo-100 border border-sky-200/70 shadow-sm overflow-hidden">
-        <svg viewBox="0 0 24 24" className="w-9 h-9">
+      <div className="relative w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-100 via-sky-50 to-indigo-100 border border-sky-200/70 shadow-sm overflow-hidden">
+        <svg viewBox="0 0 24 24" className="w-12 h-12">
           <g opacity={0.4}>
             <ellipse cx="8.5" cy="16" rx="3" ry="2.5" fill="#FBCFE8" />
             <ellipse cx="15.5" cy="16" rx="3" ry="2.5" fill="#FBCFE8" />
@@ -105,15 +106,15 @@ const AppLogo: React.FC = () => (
     </div>
 
     {/* 텍스트 영역 */}
-    <div className="flex flex-col items-start justify-center">
+    <div className="flex flex-col items-start justify-center ml-1">
       <div className="flex items-center gap-1.5">
-        <span className="text-[13px] font-black bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent tracking-tight leading-none">
+        <span className="text-[15px] font-black bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent tracking-tight leading-none">
           V.Doc
         </span>
 
         <span
           className="
-            text-[8px]
+            text-[9px]
             font-semibold
             bg-gradient-to-r from-sky-500 to-blue-600
             bg-clip-text text-transparent
@@ -127,7 +128,7 @@ const AppLogo: React.FC = () => (
         </span>
       </div>
 
-      <div className="mt-0.5 text-[7px] font-medium text-slate-500 leading-none tracking-tight">
+      <div className="mt-0.5 text-[8px] font-medium text-slate-500 leading-none tracking-tight">
         <span className="text-sky-600 font-semibold">PEDI</span>atric{" "}
         <span className="text-sky-600 font-semibold">AI</span>{" "}
         fo<span className="text-sky-600 font-semibold">R</span> Respiratory Care
@@ -135,6 +136,9 @@ const AppLogo: React.FC = () => (
     </div>
   </div>
 );
+
+
+
 
 /** **bold** 처리 렌더링 */
 const renderFormattedText = (text: string) => {
