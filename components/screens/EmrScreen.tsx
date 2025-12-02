@@ -67,7 +67,7 @@ const AppLogo: React.FC = () => (
     {/* 아이콘 영역 */}
     <div className="relative w-14 h-14 flex-shrink-0">
       <div className="absolute -inset-0.5 bg-gradient-to-br from-sky-300/30 via-cyan-200/25 to-indigo-300/25 rounded-full blur-sm" />
-      <div className="relative w-14 h-14 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-100 via-sky-50 to-indigo-100 border border-sky-200/70 shadow-sm overflow-hidden">
+      <div className="relative w-10 h-10 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-100 via-sky-50 to-indigo-100 border border-sky-200/70 shadow-sm overflow-hidden">
         <svg viewBox="0 0 24 24" className="w-12 h-12">
           <g opacity={0.4}>
             <ellipse cx="8.5" cy="16" rx="3" ry="2.5" fill="#FBCFE8" />
