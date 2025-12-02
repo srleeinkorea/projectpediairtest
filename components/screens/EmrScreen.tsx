@@ -1,0 +1,791 @@
+// src/components/screens/EmrScreen.tsx
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useCallback,
+  useMemo,
+} from "react";
+import { PatientData, ChatMessage, ScreenName } from "../../types";
+import { generateMedicalAdvice } from "../../services/geminiService";
+
+interface EmrScreenProps {
+  patientData: PatientData;
+  onToggleStatus: () => void;
+  onNavigate: (screen: ScreenName) => void;
+}
+
+/** 상단 위험도 아이콘 (신호등 얼굴) */
+const TrafficLightFace: React.FC<{
+  type: "safe" | "warning" | "danger";
+  active: boolean;
+}> = ({ type, active }) => {
+  const config = {
+    safe: {
+      gradient: "from-emerald-400 to-teal-500",
+      glow: "from-emerald-400/40 to-teal-400/40",
+      icon: "😊",
+    },
+    warning: {
+      gradient: "from-amber-400 to-orange-500",
+      glow: "from-amber-400/40 to-orange-400/40",
+      icon: "😐",
+    },
+    danger: {
+      gradient: "from-rose-400 to-pink-500",
+      glow: "from-rose-400/40 to-pink-400/40",
+      icon: "😫",
+    },
+  }[type];
+
+  return (
+    <div className="relative group">
+      {active && (
+        <div
+          className={`absolute -inset-0.5 bg-gradient-to-br ${config.glow} rounded-full blur-sm opacity-60 group-hover:opacity-80 transition-opacity duration-300`}
+        />
+      )}
+      <div
+        className={`relative w-6 h-6 rounded-full flex items-center justify-center transition-all duration-300 ${
+          active
+            ? `bg-gradient-to-br ${config.gradient} text-white shadow-md scale-110 ring-1 ring-white`
+            : "bg-slate-100 text-slate-300 opacity-60"
+        }`}
+      >
+        <span className={active ? "text-xs" : "text-[10px] opacity-70"}>
+          {config.icon}
+        </span>
+      </div>
+    </div>
+  );
+};
+
+/** 앱 로고 */
+const AppLogo: React.FC = () => (
+  <div className="flex flex-row items-center space-x-2.5 select-none">
+    {/* 아이콘 영역 */}
+    <div className="relative w-11 h-11 flex-shrink-0">
+      <div className="absolute -inset-0.5 bg-gradient-to-br from-sky-300/30 via-cyan-200/25 to-indigo-300/25 rounded-full blur-sm" />
+      <div className="relative w-11 h-11 flex items-center justify-center rounded-full bg-gradient-to-br from-sky-100 via-sky-50 to-indigo-100 border border-sky-200/70 shadow-sm overflow-hidden">
+        <svg viewBox="0 0 24 24" className="w-9 h-9">
+          <g opacity={0.4}>
+            <ellipse cx="8.5" cy="16" rx="3" ry="2.5" fill="#FBCFE8" />
+            <ellipse cx="15.5" cy="16" rx="3" ry="2.5" fill="#FBCFE8" />
+          </g>
+          <circle cx="12" cy="11.5" r="6.3" fill="#FFE7D4" />
+          <path
+            d="M11 6.1c.7-.7 1.5-.9 2.4-.7"
+            stroke="#8D6E63"
+            strokeWidth={1}
+            strokeLinecap="round"
+            fill="none"
+          />
+          <circle cx="10" cy="10.8" r="0.6" fill="#374151" />
+          <circle cx="14" cy="10.8" r="0.6" fill="#374151" />
+          <circle cx="9.3" cy="12.4" r="0.95" fill="#FEB2B2" opacity={0.8} />
+          <circle cx="14.7" cy="12.4" r="0.95" fill="#FEB2B2" opacity={0.8} />
+          <path
+            d="M13.5 13 c1 0.5 2 0 3 -0.5"
+            stroke="#38BDF8"
+            strokeWidth="0.8"
+            strokeLinecap="round"
+            fill="none"
+            opacity={0.7}
+          />
+          <path
+            d="M13 14.4 c1 0.5 1.7 0 2.7 -0.4"
+            stroke="#67E8F9"
+            strokeWidth="0.8"
+            strokeLinecap="round"
+            fill="none"
+            opacity={0.6}
+          />
+        </svg>
+      </div>
+    </div>
+
+    {/* 텍스트 영역 */}
+    <div className="flex flex-col items-start justify-center">
+      <div className="flex items-center gap-1.5">
+        <span className="text-[13px] font-black bg-gradient-to-r from-slate-800 to-slate-900 bg-clip-text text-transparent tracking-tight leading-none">
+          V.Doc
+        </span>
+
+        <span
+          className="
+            text-[8px]
+            font-semibold
+            bg-gradient-to-r from-sky-500 to-blue-600
+            bg-clip-text text-transparent
+            px-1.5 py-0.5
+            rounded-md leading-none
+            border border-sky-200/50
+            backdrop-blur-sm
+          "
+        >
+          PEDI-AIR
+        </span>
+      </div>
+
+      <div className="mt-0.5 text-[7px] font-medium text-slate-500 leading-none tracking-tight">
+        <span className="text-sky-600 font-semibold">PEDI</span>atric{" "}
+        <span className="text-sky-600 font-semibold">AI</span>{" "}
+        fo<span className="text-sky-600 font-semibold">R</span> Respiratory Care
+      </div>
+    </div>
+  </div>
+);
+
+/** **bold** 처리 렌더링 */
+const renderFormattedText = (text: string) => {
+  const parts = text.split(/\*\*(.*?)\*\*/g);
+  return parts.map((part, index) =>
+    index % 2 === 1 ? (
+      <strong key={index} className="font-extrabold text-slate-900">
+        {part}
+      </strong>
+    ) : (
+      part
+    )
+  );
+};
+ 
+const EmrScreen: React.FC<EmrScreenProps> = ({
+  patientData,
+  onToggleStatus,
+  onNavigate,
+}) => {
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [expandedEvidence, setExpandedEvidence] = useState<
+    Record<string, boolean>
+  >({});
+  const [showMenu, setShowMenu] = useState(false);
+  const [sentQuestions, setSentQuestions] = useState<Set<string>>(
+    () => new Set<string>()
+  );
+
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isFirstRender = useRef(true);
+
+  /** 위험도 계산 */
+  const getRiskLevel = useCallback((spo2: number) => {
+    if (spo2 < 90) return "danger" as const;
+    if (spo2 < 94) return "warning" as const;
+    return "safe" as const;
+  }, []);
+
+  const riskLevel = useMemo(
+    () => getRiskLevel(patientData.spo2),
+    [patientData.spo2, getRiskLevel]
+  );
+
+  const headerConfig = useMemo(
+    () =>
+      ({
+        safe: {
+          label: "현재 상태 안정적",
+          action: "가정 내 모니터링 유지",
+          gradient: "from-emerald-500 to-teal-500",
+          glow: "from-emerald-400/20 to-teal-400/20",
+        },
+        warning: {
+          label: "주의 요망",
+          action: "호흡수 변화 관찰 필요",
+          gradient: "from-amber-500 to-orange-500",
+          glow: "from-amber-400/20 to-orange-400/20",
+        },
+        danger: {
+          label: "즉시 대응 필요",
+          action: "119 신고 및 응급실 이동",
+          gradient: "from-rose-500 to-pink-500",
+          glow: "from-rose-400/20 to-pink-400/20",
+        },
+      }[riskLevel]),
+    [riskLevel]
+  );
+
+  /** 초기 안내 문구 */
+  const getInitialMessage = useCallback((data: PatientData) => {
+    if (data.spo2 < 90) {
+      return `민성이 보호자님, **산소포화도 저하(${data.spo2}%)** 알람이 1분 이상 감지되어 연락드려요.
+
+현재 **호흡수(RR)가 ${data.rr}회**로 높고, 수치를 볼 때 **가래 등 분비물이 기도를 좁게 만들어 발생할 수 있는 현상**이에요.
+
+너무 당황하지 마시고, 침착하게 **먼저 이렇게 해보세요**.
+
+[즉시 행동 가이드]
+1. 석션(Suction)을 바로 시행해주세요.
+2. 튜브가 꺾이거나 빠지지 않았는지 확인해주세요.
+
+💡 **잠깐, 왜 그럴까요?**
+가래가 기도를 막으면 공기 흐름이 차단되어 산소 수치가 급격히 떨어질 수 있습니다. 석션 후 수치 변화를 지켜봐주세요.`;
+    }
+    return `안녕하세요. 현재 민성이의 호흡 상태를 실시간 모니터링 중입니다.
+
+지금 산소포화도 ${data.spo2}%, 호흡수 ${data.rr}회로 안정적인 상태입니다.
+
+평소와 다른 점이 있거나, 궁금한 점이 있으시면 언제든 입력해 주세요.`;
+  }, []);
+
+  const isEmergency = patientData.spo2 < 90;
+  const prevEmergencyRef = useRef(isEmergency);
+
+  /** spo2 상태에 따라 초기 메시지 리셋 */
+  useEffect(() => {
+    if (isFirstRender.current || prevEmergencyRef.current !== isEmergency) {
+      setMessages([
+        {
+          id: `init-${Date.now()}`,
+          role: "model",
+          text: getInitialMessage(patientData),
+          timestamp: new Date(),
+        },
+      ]);
+      prevEmergencyRef.current = isEmergency;
+      isFirstRender.current = false;
+    }
+  }, [isEmergency, getInitialMessage, patientData]);
+
+  /** 스크롤 맨 아래로 */
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, isLoading, expandedEvidence, scrollToBottom]);
+
+  /** 메시지에서 메인 내용 / 근거 블록 분리 */
+  const parseMessageContent = useCallback((text: string) => {
+    const splitMarker = "💡 **잠깐, 왜 그럴까요?**";
+    if (text.includes(splitMarker)) {
+      const parts = text.split(splitMarker);
+      return { main: parts[0].trim(), evidence: parts[1].trim() };
+    }
+    return { main: text, evidence: null as string | null };
+  }, []);
+
+  /** 질문 전송 */
+  const handleSend = useCallback(
+    async (text: string) => {
+      if (!text.trim() || isLoading) return;
+
+      const trimmed = text.trim();
+
+      setSentQuestions((prev) => {
+        const next = new Set(prev);
+        next.add(trimmed);
+        return next;
+      });
+
+      const userMsg: ChatMessage = {
+        id: Date.now().toString(),
+        role: "user",
+        text: trimmed,
+        timestamp: new Date(),
+      };
+
+      setMessages((prev) => [...prev, userMsg]);
+      setInput("");
+      setIsLoading(true);
+
+      try {
+        // 🎯 [수정 및 개선] 응답을 trim() 하고, 빈 응답에 대비하여 Fallback 문자열 추가
+        const aiResponse = (await generateMedicalAdvice(trimmed, patientData)).trim(); 
+
+        const aiMsg: ChatMessage = {
+          id: (Date.now() + 1).toString(),
+          role: "model",
+          // 빈 응답이거나 null일 경우 대비
+          text: aiResponse || "죄송합니다. AI 답변을 생성하지 못했습니다. 잠시 후 다시 시도해 주세요.", 
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, aiMsg]);
+      } catch (error) {
+        console.error("generateMedicalAdvice 에러:", error);
+        const fallbackMsg: ChatMessage = {
+          id: (Date.now() + 2).toString(),
+          role: "model",
+          text:
+            "지금은 답변 생성 중 문제가 발생했습니다.\n\n" +
+            "증상이 급하게 나빠지거나, 청색증·의식 저하·심한 호흡곤란이 보이면 즉시 119에 연락하거나 응급실로 이동해 주세요.",
+          timestamp: new Date(),
+        };
+        setMessages((prev) => [...prev, fallbackMsg]);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    // 🎯 [개선] 의존성 배열에서 isLoading 제거 (setter 함수는 안정적)
+    [patientData] 
+  );
+
+  /** 피드백 토글 */
+  const handleFeedback = useCallback(
+    (messageId: string, type: "positive" | "negative") => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? { ...msg, feedback: msg.feedback === type ? undefined : type }
+            : msg
+        )
+      );
+    },
+    []
+  );
+
+  const toggleEvidence = useCallback((id: string) => {
+    setExpandedEvidence((prev) => ({
+      ...prev,
+      [id]: !prev[id],
+    }));
+  }, []);
+
+  /** 추천 질문 */
+  const getSuggestions = useCallback(
+    (data: PatientData) => {
+      const emergencySuggestions = [
+        "가래가 많아졌고 호흡이 너무 가빠 보여요",
+        "석션 후에도 수치가 안 올라요",
+        "응급실에 지금 가야 할까요?",
+        "입술이 파랗게 변했어요 (청색증)",
+      ];
+
+      const normalSuggestions = [
+        "가래가 없어도 석션을 규칙적으로 해야 하나요?",
+        "잘 때 호흡기 가습 온도는 몇 도가 좋나요?",
+        "지난주보다 호흡 상태가 좋아졌나요?",
+        "목욕시킬 때 주의할 점 알려줘",
+        "응급 상황 대비 물품 리스트 알려줘",
+      ];
+
+      const baseList = data.spo2 < 90 ? emergencySuggestions : normalSuggestions;
+      return baseList.filter((q) => !sentQuestions.has(q));
+    },
+    [sentQuestions]
+  );
+
+  const suggestions = useMemo(
+    () => getSuggestions(patientData),
+    [getSuggestions, patientData]
+  );
+
+  return (
+    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-sky-50/30 to-slate-100">
+      {/* 상단 헤더 (로고) */}
+      <header className="px-4 py-2.5 flex items-center justify-center bg-white/70 backdrop-blur-xl border-b border-white/20 z-30 shrink-0 shadow-sm">
+        <button
+          onClick={onToggleStatus}
+          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
+        >
+          <div className="transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+            <AppLogo />
+          </div>
+        </button>
+      </header>
+
+      {/* 위험도 헤더 */}
+      <div className="relative z-20 shrink-0">
+        <div className="relative">
+          <div
+            className={`absolute inset-0 bg-gradient-to-r ${headerConfig.glow} opacity-50`}
+          />
+          <button
+            onClick={() => onNavigate("triage")}
+            className="relative w-full px-3 py-2 flex items-center gap-2.5 bg-white/80 backdrop-blur-sm border-b border-white/30 hover:bg-white/90 active:scale-[0.995] transition-all duration-200"
+          >
+            <div className="flex items-center space-x-1.5 bg-slate-50/80 backdrop-blur-sm px-1.5 py-1 rounded-full border border-slate-200/50 shadow-sm">
+              <TrafficLightFace type="safe" active={riskLevel === "safe"} />
+              <TrafficLightFace
+                type="warning"
+                active={riskLevel === "warning"}
+              />
+              <TrafficLightFace
+                type="danger"
+                active={riskLevel === "danger"}
+              />
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <p
+                className={`text-xs font-extrabold bg-gradient-to-r ${headerConfig.gradient} bg-clip-text text-transparent truncate`}
+              >
+                {headerConfig.label}
+              </p>
+              <p className="text-[10px] text-slate-600 truncate font-medium">
+                {headerConfig.action}
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center text-slate-400">
+              <span className="text-base leading-none">›</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      {/* 채팅 영역 */}
+      <div
+        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-4"
+        onClick={() => setShowMenu(false)}
+      >
+        {messages.map((msg) => {
+          const { main, evidence } = parseMessageContent(msg.text);
+          const isUser = msg.role === "user";
+
+          return (
+            <div
+              key={msg.id}
+              className={`flex flex-col ${
+                isUser ? "items-end" : "items-start"
+              }`}
+            >
+              <div className="relative group max-w-[85%]">
+                {!isUser && (
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400/10 via-blue-400/10 to-cyan-400/10 rounded-2xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                )}
+                {isUser && (
+                  <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-500/20 to-blue-500/20 rounded-2xl blur-lg opacity-70" />
+                )}
+
+                <div
+                  className={`relative px-4 py-2.5 text-[13px] leading-relaxed whitespace-pre-line shadow-lg transition-all duration-300 ${
+                    isUser
+                      ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-2xl rounded-tr-md font-medium"
+                      : "bg-white/90 backdrop-blur-md text-slate-800 border border-white/50 rounded-2xl rounded-tl-md"
+                  }`}
+                >
+                  {isUser ? msg.text : renderFormattedText(main)}
+
+                  {!isUser && evidence && (
+                    <div className="mt-3 pt-2.5 border-t border-slate-100">
+                      <button
+                        type="button"
+                        onClick={() => toggleEvidence(msg.id)}
+                        className="flex items-center justify-between w-full text-left group/evidence"
+                      >
+                        <div className="relative">
+                          <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400/20 to-blue-400/20 rounded-lg blur opacity-0 group-hover/evidence:opacity-100 transition-opacity duration-300" />
+                          <span className="relative text-[10px] font-bold bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent px-2.5 py-1 rounded-lg bg-sky-50/80 backdrop-blur-sm border border-sky-100 flex items-center gap-1">
+                            🔍 근거 확인하기
+                          </span>
+                        </div>
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-300 ${
+                            expandedEvidence[msg.id] ? "rotate-180" : ""
+                          }`}
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 9l-7 7-7-7"
+                          />
+                        </svg>
+                      </button>
+                      {expandedEvidence[msg.id] && (
+                        <div className="mt-2.5 text-xs text-slate-700 bg-slate-50/80 backdrop-blur-sm p-3 rounded-xl leading-relaxed border border-slate-100">
+                          {renderFormattedText(evidence)}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {!isUser && (
+                <div className="flex items-center mt-1.5 ml-1.5 space-x-1.5">
+                  <span className="text-[9px] text-slate-500 font-semibold">
+                    답변이 도움이 되었나요?
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleFeedback(msg.id, "positive")}
+                    className={`p-1.5 rounded-lg border-2 transition-all duration-200 ${
+                      msg.feedback === "positive"
+                        ? "bg-gradient-to-br from-sky-50 to-blue-50 border-sky-300 text-sky-600 shadow-sm"
+                        : "bg-white border-slate-200 text-slate-400 hover:text-sky-600 hover:border-sky-200 hover:bg-sky-50/50"
+                    }`}
+                  >
+                    {/* 좋아요 아이콘 */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5"
+                      fill={msg.feedback === "positive" ? "currentColor" : "none"}
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleFeedback(msg.id, "negative")}
+                    className={`p-1.5 rounded-lg border-2 transition-all duration-200 ${
+                      msg.feedback === "negative"
+                        ? "bg-gradient-to-br from-rose-50 to-pink-50 border-rose-300 text-rose-600 shadow-sm"
+                        : "bg-white border-slate-200 text-slate-400 hover:text-rose-600 hover:border-rose-200 hover:bg-rose-50/50"
+                    }`}
+                  >
+                    {/* 싫어요 아이콘 */}
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-3.5 w-3.5"
+                      fill={
+                        msg.feedback === "negative" ? "currentColor" : "none"
+                      }
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M10 14H5.236a2 2 0 01-1.789-2.894l3.5-7A2 2 0 018.736 3h4.018a2 2 0 01.485.06l2.969 1.305m-7.18 5.635h2.969v9a2 2 0 002 2h.095c.5 0 .905-.405.905-.905 0-.714.211-1.412.608-2.006L17 13V4m-7 10h2m5-10h2a2 2 0 012 2v6a2 2 0 01-2 2h-2.5"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        {/* 로딩 인디케이터 */}
+        {isLoading && (
+          <div className="flex justify-start">
+            <div className="relative group">
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400/10 to-blue-400/10 rounded-2xl blur opacity-50" />
+              <div className="relative bg-white/90 backdrop-blur-md px-5 py-3 rounded-2xl rounded-tl-md border border-white/50 shadow-lg">
+                <div className="flex space-x-1.5">
+                  <div className="w-1.5 h-1.5 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full animate-bounce" />
+                  <div className="w-1.5 h-1.5 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full animate-bounce delay-75" />
+                  <div className="w-1.5 h-1.5 bg-gradient-to-r from-sky-400 to-blue-500 rounded-full animate-bounce delay-150" />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      {/* 하단 입력 영역 */}
+      <div className="relative bg-white/70 backdrop-blur-xl border-t border-white/30 p-3 pb-5 shadow-2xl">
+        {/* 플러스 버튼 메뉴 */}
+        {showMenu && (
+          <div className="absolute bottom-full left-3 mb-2 bg-white/90 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-2 min-w-[200px] z-50 space-y-2">
+            {/* 상태 기록 입력 메뉴 */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowMenu(false);
+                onNavigate("pro");
+              }}
+              className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 active:scale-95 transition-all"
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-indigo-500 via-sky-500 to-blue-600 flex items-center justify-center text-white">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5V3h4v2M3 12h18M9 16h6"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-slate-700">
+                상태 기록 입력
+              </span>
+            </button>
+
+            {/* 인공호흡기 상태 분석 메뉴 */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowMenu(false);
+                onNavigate("ventilator");
+              }}
+              className="w-full flex items-center gap-3 p-2 rounded-xl hover:bg-slate-100 active:scale-95 transition-all"
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-rose-500 via-pink-500 to-rose-400 flex items-center justify-center text-white">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                >
+                  <rect
+                    x="3"
+                    y="3"
+                    width="18"
+                    height="12"
+                    rx="2"
+                    ry="2"
+                    fill="none"
+                  />
+                  <path
+                    d="M7 9h2l1 3 2-6 2 3h3"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    fill="none"
+                  />
+                  <rect
+                    x="3"
+                    y="16"
+                    width="6"
+                    height="4"
+                    rx="1"
+                    ry="1"
+                    fill="none"
+                  />
+                  <rect
+                    x="15"
+                    y="16"
+                    width="6"
+                    height="4"
+                    rx="1"
+                    ry="1"
+                    fill="none"
+                  />
+                </svg>
+              </div>
+              <span className="text-sm font-semibold text-slate-700">
+                인공호흡기 상태 분석
+              </span>
+            </button>
+          </div>
+        )}
+
+        {/* 추천 질문 – 입력창 바로 위 */}
+        {!isLoading &&
+          messages.length > 0 &&
+          messages[messages.length - 1].role === "model" &&
+          suggestions.length > 0 && (
+            <div className="mb-3">
+              <div className="flex overflow-x-auto space-x-2 scrollbar-hide py-1.5">
+                {suggestions.map((s, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => handleSend(s)}
+                    className="relative group whitespace-nowrap px-3.5 py-2 text-xs font-bold rounded-xl flex-shrink-0 transition-all duration-300"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-sky-100 to-blue-100 rounded-xl opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400/20 to-blue-400/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <span className="relative bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
+                      {s}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+        <div className="flex items-center space-x-2.5">
+          {/* 플러스 버튼 */}
+          <div className="relative group">
+            <div
+              className={`absolute -inset-0.5 rounded-xl blur transition-opacity duration-300 ${
+                showMenu
+                  ? "bg-gradient-to-r from-sky-400/40 to-blue-400/40 opacity-100"
+                  : "bg-gradient-to-r from-slate-300/40 to-slate-400/40 opacity-0 group-hover:opacity-100"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowMenu((prev) => !prev)}
+              className={`relative p-3 rounded-xl flex-shrink-0 transition-all duration-300 border-2 ${
+                showMenu
+                  ? "bg-gradient-to-br from-sky-50 to-blue-50 border-sky-300 text-sky-700 rotate-45 shadow-md"
+                  : "bg-white border-slate-200 text-slate-500 hover:bg-slate-50 hover:border-slate-300"
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </button>
+          </div>
+
+          {/* 입력창 */}
+          <div className="flex-grow relative">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.nativeEvent.isComposing) {
+                  e.preventDefault();
+                  handleSend(input);
+                }
+              }}
+              placeholder="증상이나 궁금한 점을 입력하세요..."
+              className="w-full bg-white/90 backdrop-blur-sm border-2 border-slate-200 rounded-xl px-4 py-2.5 text-[13px] font-medium text-slate-800 focus:border-sky-400 focus:bg-white focus:ring-4 focus:ring-sky-100 outline-none placeholder:text-slate-400 placeholder:font-normal tracking-tight transition-all duration-200 shadow-sm"
+              disabled={isLoading}
+            />
+          </div>
+
+          {/* 전송 버튼 */}
+          <div className="relative group">
+            <div
+              className={`absolute -inset-0.5 rounded-xl blur-md transition-opacity duration-300 ${
+                input.trim() && !isLoading
+                  ? "bg-gradient-to-r from-sky-400/50 to-blue-500/50 opacity-70 group-hover:opacity-100"
+                  : "opacity-0"
+              }`}
+            />
+            <button
+              type="button"
+              onClick={() => handleSend(input)}
+              disabled={isLoading || !input.trim()}
+              className={`relative p-3 rounded-xl flex-shrink-0 transition-all duration-200 ${
+                input.trim() && !isLoading
+                  ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95"
+                  : "bg-slate-100 text-slate-300 cursor-not-allowed"
+              }`}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4"
+                viewBox="0 0 20 20"
+                fill="currentColor"
+              >
+                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default EmrScreen;
