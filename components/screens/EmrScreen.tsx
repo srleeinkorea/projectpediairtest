@@ -350,7 +350,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         "가래가 많아졌고 호흡이 너무 가빠 보여요",
         "석션 후에도 수치가 안 올라요",
         "응급실에 지금 가야 할까요?",
-        "입술이 파랗게 변했어요 (청색증)",
+        "입술이 파랗게 변했어요",
       ];
 
       const normalSuggestions = [
