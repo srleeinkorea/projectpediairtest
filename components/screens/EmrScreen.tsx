@@ -18,26 +18,44 @@ interface EmrScreenProps {
   onNavigate: (screen: ScreenName) => void;
 }
 
-/** PediAir 로고 */
+/** PediAir 로고 – 아기 느낌 버전 */
 const PediairLogo: React.FC = () => (
   <div className="flex items-center gap-1.5">
-    {/* 심볼: 집 + 숨 곡선 느낌 */}
-    <div className="w-6 h-6 rounded-xl bg-gradient-to-br from-emerald-300 to-teal-500 flex items-center justify-center relative overflow-hidden">
-      {/* 집 지붕/몸체 (아주 단순화) */}
-      <div className="absolute bottom-[7px] w-3 h-2 border-b-2 border-x-2 border-white/90 rounded-b-[4px]" />
-      {/* 숨/공기 곡선 두 줄 */}
-      <div className="absolute top-1 left-1 right-1 h-[2px] bg-white/30 rounded-full" />
-      <div className="absolute top-2 left-2 right-2 h-[2px] bg-white/40 rounded-full" />
+    {/* 심볼: 아기 얼굴 + 숨 라인 */}
+    <div className="w-7 h-7 rounded-full bg-gradient-to-br from-emerald-300 to-sky-300 flex items-center justify-center relative overflow-hidden shadow-sm">
+      {/* 아기 얼굴 */}
+      <div className="w-5 h-5 rounded-full bg-amber-50 border border-amber-100 flex items-center justify-center relative">
+        {/* 볼터치 */}
+        <div className="absolute left-1 top-[11px] w-1.5 h-1.5 rounded-full bg-rose-200/70" />
+        <div className="absolute right-1 top-[11px] w-1.5 h-1.5 rounded-full bg-rose-200/70" />
+        {/* 눈 + 입 */}
+        <div className="flex flex-col items-center justify-center">
+          <div className="flex gap-[2px] mt-[1px]">
+            <div className="w-0.5 h-0.5 rounded-full bg-slate-700" />
+            <div className="w-0.5 h-0.5 rounded-full bg-slate-700" />
+          </div>
+          <div className="w-3 h-1.5 border-b-[1.5px] border-slate-700 rounded-b-full mt-[1px]" />
+        </div>
+      </div>
+      {/* 오른쪽 숨/공기 라인 */}
+      <div className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-1">
+        <div className="w-3 h-[2px] bg-white/60 rounded-full mb-[2px]" />
+        <div className="w-2 h-[2px] bg-white/40 rounded-full" />
+      </div>
     </div>
 
-    {/* 워드마크 */}
-    <span className="text-[13px] font-semibold tracking-tight">
-      <span className="text-slate-900">Pedi</span>
-      <span className="text-emerald-500">Air</span>
-    </span>
+    {/* 워드마크: 위에 V.Doc, 아래 PediAir */}
+    <div className="flex flex-col leading-none">
+      <span className="text-[9px] font-semibold text-slate-500 tracking-[0.16em] uppercase">
+        V.Doc
+      </span>
+      <span className="text-[13px] font-bold tracking-tight">
+        <span className="text-slate-900">Pedi</span>
+        <span className="text-emerald-500">Air</span>
+      </span>
+    </div>
   </div>
 );
-
 
 /** 상단 위험도 아이콘 (신호등 얼굴) */
 const TrafficLightFace: React.FC<{
@@ -343,32 +361,19 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
-      {/* 상단 헤더 (로고 자리 텍스트로 대체) */}
-
+      {/* 상단 헤더 - 로고만 심플하게 */}
       <header className="px-4 py-2 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
-  <button
-    type="button"
-    onClick={onToggleStatus}
-    className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
-    aria-label="홈으로 이동"
-  >
-    <div className="flex items-center space-x-2.5 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
-      {/* 왼쪽: 지금 만든 PediAir 로고 */}
-      <PediairLogo />
-
-      {/* 오른쪽: 서비스 이름/설명 */}
-      <div className="flex flex-col leading-tight">
-        <span className="text-[11px] font-semibold text-slate-900 tracking-[0.12em] uppercase">
-          V.Doc <span className="text-indigo-600">PEDI-AIR</span>
-        </span>
-        <span className="text-[10px] text-slate-500">
-          PEDIatric AI for Respiratory care
-        </span>
-      </div>
-    </div>
-  </button>
-</header>
-
+        <button
+          type="button"
+          onClick={onToggleStatus}
+          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
+          aria-label="홈으로 이동"
+        >
+          <div className="transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+            <PediairLogo />
+          </div>
+        </button>
+      </header>
 
       {/* 위험도 헤더 */}
       <div className="relative z-20 shrink-0">
