@@ -18,6 +18,27 @@ interface EmrScreenProps {
   onNavigate: (screen: ScreenName) => void;
 }
 
+/** PediAir 로고 */
+const PediairLogo: React.FC = () => (
+  <div className="flex items-center gap-1.5">
+    {/* 심볼: 집 + 숨 곡선 느낌 */}
+    <div className="w-6 h-6 rounded-xl bg-gradient-to-br from-emerald-300 to-teal-500 flex items-center justify-center relative overflow-hidden">
+      {/* 집 지붕/몸체 (아주 단순화) */}
+      <div className="absolute bottom-[7px] w-3 h-2 border-b-2 border-x-2 border-white/90 rounded-b-[4px]" />
+      {/* 숨/공기 곡선 두 줄 */}
+      <div className="absolute top-1 left-1 right-1 h-[2px] bg-white/30 rounded-full" />
+      <div className="absolute top-2 left-2 right-2 h-[2px] bg-white/40 rounded-full" />
+    </div>
+
+    {/* 워드마크 */}
+    <span className="text-[13px] font-semibold tracking-tight">
+      <span className="text-slate-900">Pedi</span>
+      <span className="text-emerald-500">Air</span>
+    </span>
+  </div>
+);
+
+
 /** 상단 위험도 아이콘 (신호등 얼굴) */
 const TrafficLightFace: React.FC<{
   type: "safe" | "warning" | "danger";
