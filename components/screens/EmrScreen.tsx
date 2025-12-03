@@ -163,7 +163,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         },
         warning: {
           label: "주의 요망",
-          action: "호흡수 변화 관찰 필요",
+          action: "호흡수 변화 관찰 요",
           gradient: "from-amber-500 to-orange-500",
           glow: "from-amber-100/40 to-orange-100/40",
         },
