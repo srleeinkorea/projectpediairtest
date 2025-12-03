@@ -40,7 +40,7 @@ const Layout: React.FC<LayoutProps> = ({
           className={`
             relative
             w-full
-            max-w-[400px]
+            max-w-[370px]
             h-[100dvh]
             sm:h-auto
             sm:aspect-[9/19.5]   /* 웹에서 9:19.5 정도 비율의 폰처럼 */
