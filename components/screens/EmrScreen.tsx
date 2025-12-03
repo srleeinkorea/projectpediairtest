@@ -344,19 +344,30 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   return (
     <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 (로고 자리 텍스트로 대체) */}
-            {/* 상단 헤더 (브랜드 로고) */}
+
       <header className="px-4 py-2 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
-        <button
-          type="button"
-          onClick={onToggleStatus}
-          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
-          aria-label="홈으로 이동"
-        >
-          <div className="transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
-            <PediairLogo />
-          </div>
-        </button>
-      </header>
+  <button
+    type="button"
+    onClick={onToggleStatus}
+    className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
+    aria-label="홈으로 이동"
+  >
+    <div className="flex items-center space-x-2.5 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+      {/* 왼쪽: 지금 만든 PediAir 로고 */}
+      <PediairLogo />
+
+      {/* 오른쪽: 서비스 이름/설명 */}
+      <div className="flex flex-col leading-tight">
+        <span className="text-[11px] font-semibold text-slate-900 tracking-[0.12em] uppercase">
+          V.Doc <span className="text-indigo-600">PEDI-AIR</span>
+        </span>
+        <span className="text-[10px] text-slate-500">
+          PEDIatric AI for Respiratory care
+        </span>
+      </div>
+    </div>
+  </button>
+</header>
 
 
       {/* 위험도 헤더 */}
