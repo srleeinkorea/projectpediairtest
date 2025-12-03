@@ -140,12 +140,13 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   const isFirstRender = useRef(true);
 
   /** 위험도 계산 */
-  const getRiskLevel = useCallback((spo2: number) => {
-    if (spo2 < 90) return "danger" as const;
-    if (spo2 < 94) return "warning" as const;
-    return "safe" as const;
-  }, []);
-
+  /** 위험도 계산 – 이 EMR 화면에서는 '주의' 단계 없이 안정/위험만 사용 */
+const getRiskLevel = useCallback((spo2: number) => {
+  // 90 미만이면 바로 '위험', 그 외에는 모두 '안정'
+  if (spo2 < 90) return "danger" as const;
+  return "safe" as const;
+}, []);
+ 
   const riskLevel = useMemo(
     () => getRiskLevel(patientData.spo2),
     [patientData.spo2, getRiskLevel],
