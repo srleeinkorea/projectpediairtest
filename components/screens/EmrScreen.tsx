@@ -362,27 +362,28 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   return (
     <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 - 로고만 심플하게 */}
-      <header className="px-4 py-2 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
+      
+      <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
   <button
     type="button"
     onClick={onToggleStatus}
     className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
     aria-label="홈으로 이동"
   >
-    <div className="flex items-center gap-2.5 transition-transform duration-300 group-hover:scale-[1.03] group-active:scale-95">
-      {/* 아이콘 박스 */}
-      <div className="bg-indigo-600 p-2 rounded-lg shadow-sm">
+    <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+      {/* 아이콘 박스 (조금 더 작게) */}
+      <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
+          width="20"
+          height="20"
           viewBox="0 0 24 24"
           fill="none"
           stroke="currentColor"
           strokeWidth="2"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="lucide lucide-baby w-6 h-6 text-white"
+          className="w-5 h-5 text-white"
           aria-hidden="true"
         >
           <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
@@ -392,13 +393,15 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         </svg>
       </div>
 
-      {/* 텍스트 로고 */}
-      <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+      {/* 텍스트 로고 (폰트 살짝 줄임) */}
+      <span className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
         V.Doc PEDI-AIR
       </span>
     </div>
   </button>
 </header>
+
+
 
       {/* 위험도 헤더 */}
       <div className="relative z-20 shrink-0">
