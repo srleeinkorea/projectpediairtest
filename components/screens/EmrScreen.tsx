@@ -204,7 +204,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
     return { main: text, evidence: null as string | null };
   }, []);
 
-  const handleSend = useCallback(
+    const handleSend = useCallback(
     async (text: string) => {
       if (!text.trim() || isLoading) return;
 
@@ -226,17 +226,17 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       setIsLoading(true);
 
       try {
-       const effectiveName = childName || patientData.name;
+        // ✅ 여기서 화면상의 아이 이름을 우선 사용
+        const effectiveName = childName || patientData.name;
 
-const aiResponseRaw = await generateMedicalAdvice(
-  trimmed,
-  {
-    ...patientData,
-    name: effectiveName,   // ★ 여기서 이름을 childName으로 덮어쓰기
-  } as PatientData,
-);
-
+        const aiResponseRaw = await generateMedicalAdvice(
+          trimmed,
+          {
+            ...patientData,
+            name: effectiveName, // ✅ childName으로 덮어쓰기
+          } as PatientData,
         );
+
         const aiResponse =
           typeof aiResponseRaw === "string" ? aiResponseRaw.trim() : "";
 
@@ -264,7 +264,7 @@ const aiResponseRaw = await generateMedicalAdvice(
         setIsLoading(false);
       }
     },
-    [patientData, isLoading],
+    [patientData, childName, isLoading],
   );
 
   const handleFeedback = useCallback(
