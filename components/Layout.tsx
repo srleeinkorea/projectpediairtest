@@ -4,11 +4,8 @@ import { ScreenName } from "../types";
 
 interface LayoutProps {
   children: React.ReactNode;
-  // 향후 확장 대비: App에서 내려줄 수는 있지만, 지금은 사용하지 않으므로 선택 옵션으로만 둠
   activeScreen?: ScreenName;
   onNavigate?: (screen: ScreenName) => void;
-
-  // 아기 프로필 변경용
   onChangeChild?: () => void;
   childName?: string;
 }
@@ -18,13 +15,7 @@ interface LayoutProps {
  * - 모바일: 전체 화면 앱
  * - 데스크톱: 스마트폰 목업(폰 프레임 + 옆 버튼)
  */
-const Layout: React.FC<LayoutProps> = ({
-  children,
-  onChangeChild,
-  childName,
-}) => {
-  const displayChildName = childName ?? "우리 아이";
-
+const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div
       className="
@@ -32,16 +23,13 @@ const Layout: React.FC<LayoutProps> = ({
         min-h-[100dvh]
         flex
         justify-center
-        items-stretch
+        items-center          /* 항상 가운데 정렬 */
         bg-gradient-to-b from-slate-100 via-slate-100 to-slate-200
-        sm:items-center
         sm:px-4
       "
     >
       {/* 중앙 정렬 래퍼 */}
-      <div className="relative flex justify-center items-center w-full max-w-[480px] pt-10 sm:pt-12">
-           
-
+      <div className="relative flex justify-center items-center w-full max-w-[480px]">
         {/* 바닥에 살짝 떨어진 폰 그림자 (웹 전용) */}
         <div className="hidden sm:block absolute -bottom-6 inset-x-10 h-10 bg-slate-900/25 blur-2xl rounded-full pointer-events-none" />
 
@@ -51,7 +39,7 @@ const Layout: React.FC<LayoutProps> = ({
             relative
             w-full
             max-w-[370px]
-            h-[100dvh]
+            h-[calc(100dvh-4rem)]   /* 화면 상하에 여유 두고 맞추기 */
             sm:h-auto
             sm:aspect-[9/19.5]
             flex
@@ -97,7 +85,7 @@ const Layout: React.FC<LayoutProps> = ({
                 paddingBottom: "env(safe-area-inset-bottom)",
               }}
             >
-              {/* 상단 카메라/스피커 바 느낌 (웹에서만) */}
+              {/* 상단 카메라/스피커 바 (웹에서만) */}
               <div className="hidden sm:flex absolute top-1 left-1/2 -translate-x-1/2 h-4 w-24 rounded-full bg-slate-900/90" />
 
               {/* 실제 화면 컨텐츠 */}
