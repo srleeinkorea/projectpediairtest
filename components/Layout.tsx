@@ -7,39 +7,51 @@ interface LayoutProps {
   onNavigate: (screen: ScreenName) => void;
 }
 
+/**
+ * 레이아웃 컨셉
+ * - 모바일: 화면 전체를 채우는 자연스러운 앱
+ * - 데스크톱: 가운데에 세로 긴 "모바일 기기 1대"처럼 보이는 카드
+ *   (연한 배경 + 부드러운 그림자 + 적당한 라운드)
+ */
 const Layout: React.FC<LayoutProps> = ({
   children,
   activeScreen,
   onNavigate,
 }) => {
   return (
-    /**
-     * 바깥 래퍼
-     * - 모바일: 화면 전체를 채움
-     * - 데스크탑: 가운데에 "폰 1대" 사이즈로만 보이게
-     */
-    <div className="w-full min-h-[100dvh] bg-slate-900 flex items-center justify-center">
-      {/* 실제 앱이 보이는 폰 프레임 */}
+    <div
+      className="
+        w-full
+        min-h-[100dvh]
+        flex
+        justify-center
+        items-stretch
+        bg-gradient-to-b from-slate-100 via-slate-100 to-slate-200
+        sm:items-center
+        sm:px-4
+      "
+    >
+      {/* 실제 앱 컨테이너 */}
       <div
-        className="
+        className={`
           relative
           w-full
-          max-w-[420px]           /* 브라우저에서 항상 이 정도 폭으로 제한 → 모바일 폭처럼 보이게 */
-          h-[100dvh]              /* 모바일일 때는 전체 높이 */
-          md:h-[844px]            /* 데스크탑에선 아이폰 수준 높이로 고정 */
-          md:rounded-[32px]       /* 데스크탑에서만 둥근 모서리 → 디바이스 느낌 */
+          max-w-[420px]
+          h-[100dvh]
+          sm:h-[780px]
           bg-slate-50
-          shadow-[0_24px_60px_rgba(15,23,42,0.5)]
-          overflow-hidden
           flex flex-col
-          border border-slate-200/80
-        "
+          overflow-hidden
+          sm:rounded-[28px]
+          sm:shadow-[0_26px_60px_rgba(15,23,42,0.30)]
+          sm:border sm:border-slate-200/80
+        `}
         style={{
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
       >
-        {/* 메인 콘텐츠 영역 - 각 화면 컴포넌트에서 자체 스크롤 관리 */}
+        {/* 화면별 컨텐츠: 각 Screen이 안에서 스크롤 관리 */}
         <main className="flex-1 relative overflow-hidden w-full flex flex-col">
           {children}
         </main>
