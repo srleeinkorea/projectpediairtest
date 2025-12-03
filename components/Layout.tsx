@@ -1,5 +1,5 @@
-import React from "react";
-import { ScreenName } from "../types";
+import React from 'react';
+import { ScreenName } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -7,17 +7,14 @@ interface LayoutProps {
   onNavigate: (screen: ScreenName) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({
-  children,
-  activeScreen, // 지금은 안 쓰지만 타입 유지
-  onNavigate,
-}) => {
+const Layout: React.FC<LayoutProps> = ({ children, activeScreen, onNavigate }) => {
   return (
-    <div className="min-h-screen bg-sky-50 flex justify-center px-3 py-3">
-      {/* 실제 폰 크기 느낌: 최소 360, 최대 414px 정도 */}
-      <div className="w-full max-w-[414px] min-w-[360px]">
+    // Use 100dvh for better mobile browser support
+    <div className="max-w-xl mx-auto bg-slate-50 h-[100dvh] w-full relative shadow-2xl overflow-hidden flex flex-col">
+      {/* Main content area - overflow hidden so children manage their own scroll */}
+      <main className="flex-1 relative overflow-hidden w-full flex flex-col">
         {children}
-      </div>
+      </main>
     </div>
   );
 };

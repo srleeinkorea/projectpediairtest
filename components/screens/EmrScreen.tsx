@@ -415,7 +415,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
             className={`
               relative w-full px-3 py-2 flex items-center gap-2
               backdrop-blur-sm border-b border-white/40 rounded-b-xl
-              transition-all duration-200 active:scale-[0.99]
+              transition-all duration-100 active:scale-[0.99]
               ${
                 riskLevel === "danger"
                   ? "bg-rose-50 hover:bg-rose-100"

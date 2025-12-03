@@ -88,23 +88,16 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
   return (
     <div className="h-full bg-slate-50 flex flex-col font-sans max-w-md mx-auto">
-<<<<<<< HEAD
       {/* HEADER – EmrScreen과 톤/사이즈 맞춤 */}
       <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
-=======
-      {/* HEADER */}
-
-      {/* 상단 헤더 - 좌측 정렬, 작은 로고 텍스트 */}
-      <header className="px-3 py-1.5 flex items-center justify-start bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
->>>>>>> parent of 83952c9 (update)
         <button
           type="button"
-          onClick={onToggleStatus}
+          onClick={onBack}
           className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
-          aria-label="홈으로 이동"
+          aria-label="이전 화면으로 이동"
         >
           <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
-            {/* 아이콘 박스 (그대로) */}
+            {/* 아이콘 박스 */}
             <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -126,7 +119,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               </svg>
             </div>
 
-            {/* 텍스트 로고 + 서브카피 (더 작게, 좌측 정렬) */}
+            {/* 텍스트 로고 + 서브카피 */}
             <div className="flex flex-col leading-tight items-start">
               <span className="text-[18px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
                 V.Doc PEDI-AIR
@@ -227,7 +220,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
             </div>
           </div>
 
-          {/* 3. 액션 카드 (타이틀 없이 바로) */}
+          {/* 3. 액션 카드 */}
           <div className="mt-1">
             <div
               className={`
@@ -245,12 +238,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
           </div>
         </section>
 
-<<<<<<< HEAD
         {/* EMERGENCY SECTION: 119 + 응급실 리스트 */}
-=======
-        {/* EMERGENCY SECTION: 119 + 지도 */}
-        {/* EMERGENCY SECTION: 119 + 지도 */}
->>>>>>> parent of 83952c9 (update)
         {isEmergency && (
           <section
             role="alert"
@@ -261,7 +249,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
             {/* 119 바로 연결 버튼 */}
             <button
               type="button"
-              autoFocus
               onClick={() => {
                 window.location.href = "tel:119";
               }}
@@ -272,7 +259,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               <span>119로 바로 전화하기</span>
             </button>
 
-<<<<<<< HEAD
             {/* 가까운 응급실 가용 병상 리스트 */}
             <div className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
               {/* 상단 헤더 + 범례 */}
@@ -284,33 +270,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                   <span className="text-[10px] text-slate-400">
                     중앙응급의료센터 데이터 예시 기준
                   </span>
-=======
-            {/* 소아응급실 지도 카드 – 텍스트 최소화, 지도 크게 */}
-            <button
-              type="button"
-              onClick={() => {
-                // 예: onNavigate("map") 또는 window.open(지도URL)
-              }}
-              className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm active:scale-[0.98] transition text-left space-y-2.5"
-              aria-label="가까운 소아응급실 지도 열기"
-            >
-              {/* 상단 한 줄 헤더 */}
-              <div className="flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-slate-900">
-                  가까운 소아응급실 지도
-                </span>
-                <span className="text-[11px] text-slate-400">열기</span>
-              </div>
-
-              {/* 지도 느낌 나는 일러스트 영역 (더 크게) */}
-              <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mt-1.5">
-                {/* 간단한 격자/도로 느낌 */}
-                <div className="absolute inset-0 opacity-80">
-                  <div className="absolute left-0 right-0 top-1/3 h-6 bg-white/80 border-y border-slate-200" />
-                  <div className="absolute left-0 right-0 top-2/3 h-6 bg-white/80 border-y border-slate-200" />
-                  <div className="absolute top-0 bottom-0 left-1/3 w-6 bg-white/80 border-x border-slate-200" />
-                  <div className="absolute top-0 bottom-0 left-2/3 w-6 bg-white/80 border-x border-slate-200" />
->>>>>>> parent of 83952c9 (update)
                 </div>
                 <button
                   type="button"

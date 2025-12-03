@@ -1,88 +1,121 @@
-// src/services/geminiService.ts
 
 import { GoogleGenAI } from "@google/genai";
 import { PatientData } from "../types";
 
-// 💡 시스템 인스트럭션: AI의 페르소나와 모든 규칙을 정의합니다.
+// Refined SYSTEM_INSTRUCTION for maximum conciseness and clarity
 const SYSTEM_INSTRUCTION = `
 You are **V.Doc AI**, a warm, empathetic, and efficient pediatric home care specialist.
+You are talking to a worried parent of a 5-year-old child (Min-seong) who has a Tracheostomy.
 
-- 아동 보호자에게 **이해하기 쉽고 매우 친절하게** 대답해주세요
-- 응답의 주요 목적은 **정확하고 시의적절한 조언**을 제공하는 것입니다.
-- 의사처럼 **진단하거나 판단하지 마세요**. 가능성만 제시하고 그 이유를 누구나 알기 쉬우면서 타당하게, 그러나 근거 기반으로 알려주세요.
-- 위험 시나리오에서는 **응급실 방문**을 강력히 권고하고, 그 이유를 아이의 현재 수치나 증상과 연결하여 **아주 타당하게 제시**해야 합니다.
-- **인공호흡기 압력, P-Peak 등** 관련 기술적인 언급은 절대 하지 마세요.
+**CRITICAL GOAL:**
+Parents are busy and worried. Your goal is maximum clarity in minimum time. **Think in bullet points.**
+Be **concise**, **warm**, and **action-oriented**.
+
+**Response Structure (Strictly Follow):**
+1.  **Empathy (1 SHORT line)**: A brief, warm acknowledgment (e.g., "많이 놀라셨죠?", "걱정 마세요. 🍀").
+2.  **Core Answer (Bulleted List)**: **ALWAYS use bullet points** ('✅', '👉', '1.') for any actions or key information. No paragraphs. **Bold** the most important words. The main body (excluding evidence) must be **under 120 characters**.
+3.  **Evidence Section**: SEPARATE the medical explanation using the marker: "💡 **잠깐, 왜 그럴까요?**".
+
+**Interactive Assessment Logic:**
+If the user reports symptoms (e.g., "가래가 늘었어", "숨소리가 이상해") WITHOUT providing numbers:
+- **DO NOT** give a solution yet.
+- **ASK** specific questions immediately using bullet points:
+  1. Have you done **Suction**?
+  2. What is the current **SpO2**?
+  3. Is there any **Cyanosis** (Blue lips)?
+
+**Tone Rules:**
+- Use soft honorifics (~해요, ~까요?).
+- Use emojis to be friendly but professional.
+- **ABSOLUTELY NO** paragraphs or long sentences in the main answer.
+- Avoid complex medical jargon. If you must use a term, explain it simply. Ex: 청색증 (입술이 파랗게 변하는 현상).
+
+**Scenario Examples:**
+
+*User: "가래가 많아졌고 호흡이 너무 가빠 보여요"*
+*AI Response:*
+많이 걱정되시죠? 😢 정확한 상태 파악을 위해 먼저 확인해주세요.
+
+👉 **체크리스트**
+1. **석션(흡인)**을 지금 바로 시행하셨나요?
+2. 현재 **산소포화도(SpO2)** 수치가 몇 % 인가요?
+3. **입술 색**이 파랗지는 않나요?
+
+답변 주시면 바로 가이드 드릴게요! 💪
+
+---
+
+*User: "석션 했는데도 산소포화도가 89야"*
+*AI Response:*
+🚨 **즉시 대응이 필요합니다.**
+
+✅ **긴급 행동 요령**
+1. **119**에 즉시 신고하세요.
+2. **산소 농도**를 최대로 올리세요.
+3. **엠부 백(Ambu-bag)**으로 수동 환기를 시작하세요.
+
+💡 **잠깐, 왜 그럴까요?**
+석션 후에도 수치가 오르지 않는다면 폐 내부의 심각한 막힘(Mucus Plug)이나 기흉 가능성이 있습니다. 지체 없이 응급실로 이동해야 합니다.
+
+---
+
+*User: "기침하면서 93까지 떨어졌는데 1분 만에 96으로 올랐어"*
+*AI Response:*
+금방 회복했다니 다행이에요! 😌 일시적인 현상일 수 있어요.
+
+✅ **권장 조치**
+1. 아이가 편안하도록 **자세**를 잡아주세요.
+2. **안정된 상태**가 유지되는지 지켜봐주세요.
+
+💡 **잠깐, 왜 그럴까요?**
+기침 시 흉부 압력이 높아져 일시적으로 산소 수치가 떨어질 수 있습니다. 1분 내 회복은 폐 기능이 양호하다는 신호입니다.
 
 **General Rule:**
-Always output in **Korean**. Keep the main part **under 150 characters** if possible.
+Always output in **Korean**.
 `;
 
 export const generateMedicalAdvice = async (
   query: string,
   patientData: PatientData
 ): Promise<string> => {
-  // 1. 환경변수에서 키 읽기
-  const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
-
-  if (!apiKey) {
-    console.warn("VITE_GEMINI_API_KEY is missing. Switching to Demo Mode.");
-    return handleDemoFallback(query);
-  }
-
   try {
-    // 2. 클라이언트 생성 (키가 string임을 단언)
-    const ai = new GoogleGenAI({ apiKey: apiKey as string });
+    if (!process.env.API_KEY) {
+      console.warn("API_KEY is missing. Switching to Demo Mode.");
+      throw new Error("Missing API Key");
+    }
 
-    // 3. AI에게 전달할 실시간 환자 데이터 컨텍스트 생성 (P-Peak 제거됨)
+    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
     const context = `
-[Patient Profile]
-- Name: ${patientData.name} (${patientData.age}yo)
-- Diagnosis: ${patientData.emrDiagnosis}
-- Lung Compliance: ${patientData.compliance}
+    [Patient Profile]
+    - Name: ${patientData.name} (${patientData.age}yo)
+    - Diagnosis: ${patientData.emrDiagnosis}
+    - Lung Compliance: ${patientData.compliance}
 
-[Real-time Vitals]
-- SpO2: ${patientData.spo2}% (Target: >95%, Danger: <90%)
-- Respiratory Rate (RR): ${patientData.rr} bpm
+    [Real-time Vitals]
+    - SpO2: ${patientData.spo2}% (Target: >95%, Danger: <90%)
+    - Respiratory Rate (RR): ${patientData.rr} bpm
+    - Ventilator: P-Peak ${patientData.p_peak_measured} (Limit: ${patientData.p_peak_threshold})
     `;
 
-    const fullUserPrompt = `System Context:\n${context}\n\nUser Query: ${query}`;
-
-    // 4. API 호출
-    const result = await ai.models.generateContent({
+    const response = await ai.models.generateContent({
       model: "gemini-2.5-flash",
-      // contents: Chat Completions API 표준 형식으로 데이터 전달
-      contents: [{ role: "user", parts: [{ text: fullUserPrompt }] }],
+      contents: `System Context:\n${context}\n\nUser Query: ${query}`,
       config: {
         systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.3,
+        temperature: 0.3, 
       },
     });
 
-    // 5. 응답 텍스트 반환
-    return result.text;
+    return response.text || "죄송합니다. AI 응답을 불러올 수 없습니다.";
   } catch (error) {
-    console.error("🚨 Gemini API Error:", error);
-    return handleDemoFallback(query);
+    console.error("Gemini API Error or Demo Fallback:", error);
+    
+    // Fallback Mock Response for Demo purposes when API Key is missing or fails
+    if (query.includes("가래") || query.includes("호흡")) {
+        return `(데모 모드: AI 연결 실패) 많이 걱정되시죠? 😢\n\n✅ **먼저 확인해주세요**\n1. **석션(흡인)**을 먼저 시행해주세요.\n2. 튜브가 꺾이지 않았는지 확인해주세요.\n\n증상이 계속되면 의료진에게 연락하세요!`;
+    }
+    
+    return `(데모 모드: AI 연결 실패) 현재 통신 상태가 원활하지 않아요. 😢\n\n✅ **권장 조치**\n1. 아이의 **호흡 상태**를 직접 확인해주세요.\n2. **산소포화도**가 90% 이상인지 체크해주세요.\n\n응급 상황이라면 즉시 119에 연락하세요!`;
   }
-};
-
-// 💡 데모/오류 발생 시 대체 응답 로직
-const handleDemoFallback = (query: string): string => {
-  if (query.includes("가래") || query.includes("호흡")) {
-    return `(데모 모드: AI 연결 실패) 많이 걱정되시죠? 😢
-
-✅ **먼저 확인해주세요**
-1. **석션(흡인)**을 먼저 시행해주세요.
-2. 튜브가 꺾이지 않았는지 확인해주세요.
-
-증상이 계속되면 의료진에게 연락하세요!`;
-  }
-
-  return `(데모 모드: AI 연결 실패) 현재 통신 상태가 원활하지 않아요. 😢
-
-✅ **권장 조치**
-1. 아이의 **호흡 상태**를 직접 확인해주세요.
-2. **산소포화도**가 90% 이상인지 체크해주세요.
-
-응급 상황이라면 즉시 119에 연락하세요!`;
 };
