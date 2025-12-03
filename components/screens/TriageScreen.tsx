@@ -43,7 +43,7 @@ const STATUS_CONFIG: Record<
   3: {
     title: "응급 상황이 의심돼요",
     desc: "저산소 상태가 계속 확인되고 있어, 의료진의 신속하고 즉각적인 전문 진료가 필요해요.",
-    action: "망설이지 말고 119 또는 가까운 소아응급실로 즉시 이동해 주세요.",
+    action: "119 또는 가까운 응급실 방문을 권고드려요.",
     color: "rose",
   },
 } as const;
@@ -166,14 +166,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               label="지난 24시간 건강 신호 요약"
               accent={status.color}
             />
-            <p className="text-[11px] text-slate-500 leading-snug">
-              SpO₂, 호흡수, PIP를 바탕으로{" "}
-              <span className="font-semibold text-slate-700">
-                전체적인 위험도를 한눈에
-              </span>{" "}
-              볼 수 있어요.
-            </p>
-
             <div className="flex flex-col items-center justify-center pt-1 gap-3">
               {/* 얼굴 게이지 */}
               <div className="flex flex-col items-center w-full max-w-[280px] gap-1.5">
