@@ -25,7 +25,7 @@ const STATUS_CONFIG: Record<
     color: "mint",
   },
   3: {
-    title: "응급 단계예요, 바로 병원으로 가야 합니다",
+    title: "응급 상황 의심, 가까운 응급실 방문을 권장해요",
     desc: "저산소 상태가 계속 확인되고 있어, 의료진의 신속하고 즉각적인 전문 진료가 요구됩니다.",
     action: "119 또는 가까운 소아응급실로 즉시 이동해 주세요.",
     color: "rose",
@@ -58,7 +58,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label, accent }) => {
 const TriageScreen: React.FC<TriageScreenProps> = ({
   onBack,
   patientData,
-  onNavigate,
+  onNavigate, // 아직 사용 안 하지만 시그니처 유지
 }) => {
   const getRiskLevel = (data: PatientData): RiskLevel => {
     if (
@@ -88,7 +88,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
   return (
     <div className="h-full bg-slate-50 flex flex-col font-sans max-w-md mx-auto">
-      {/* HEADER – EmrScreen이랑 높이·톤 맞춘 부분 */}
+      {/* HEADER – EmrScreen과 톤/사이즈 맞춤 */}
       <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
         <button
           type="button"
@@ -121,7 +121,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
             {/* 텍스트 로고 + 서브카피 */}
             <div className="flex flex-col leading-tight items-start">
-              <span className="text-[20px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+              <span className="text-[18px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
                 V.Doc PEDI-AIR
               </span>
               <span className="text-[9px] text-slate-500">
@@ -238,7 +238,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
           </div>
         </section>
 
-        {/* EMERGENCY SECTION: 119 + 지도 */}
+        {/* EMERGENCY SECTION: 119 + 응급실 리스트 */}
         {isEmergency && (
           <section
             role="alert"
@@ -259,69 +259,165 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               <span>119로 바로 전화하기</span>
             </button>
 
-            {/* 소아응급실 지도 카드 */}
-            <button
-              type="button"
-              onClick={() => {
-                // 나중에 onNavigate("map") 등으로 연결 가능
-                onNavigate("triage"); // placeholder: 현재는 화면 유지
-              }}
-              className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm active:scale-[0.98] transition text-left space-y-2.5"
-              aria-label="가까운 소아응급실 지도 열기"
-            >
-              {/* 상단 한 줄 헤더 */}
+            {/* 가까운 응급실 가용 병상 리스트 */}
+            <div className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
+              {/* 상단 헤더 + 범례 */}
               <div className="flex items-center justify-between">
-                <span className="text-[13px] font-semibold text-slate-900">
-                  가까운 소아응급실 지도
-                </span>
-                <span className="text-[11px] text-slate-400">열기</span>
-              </div>
-
-              {/* 지도 느낌 일러스트 */}
-              <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mt-1.5">
-                {/* 격자/도로 */}
-                <div className="absolute inset-0 opacity-80">
-                  <div className="absolute left-0 right-0 top-1/3 h-6 bg-white/80 border-y border-slate-200" />
-                  <div className="absolute left-0 right-0 top-2/3 h-6 bg-white/80 border-y border-slate-200" />
-                  <div className="absolute top-0 bottom-0 left-1/3 w-6 bg-white/80 border-x border-slate-200" />
-                  <div className="absolute top-0 bottom-0 left-2/3 w-6 bg-white/80 border-x border-slate-200" />
+                <div className="flex flex-col gap-0.5">
+                  <span className="text-[13px] font-semibold text-slate-900">
+                    가까운 소아응급실 가용 병상
+                  </span>
+                  <span className="text-[10px] text-slate-400">
+                    중앙응급의료센터 데이터 예시 기준
+                  </span>
                 </div>
-
-                {/* 병원 마커 */}
-                <div className="absolute left-[68%] top-[38%] -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-[11px] text-white shadow-md">
-                    🏥
-                  </div>
-                  <div className="mt-1 text-[11px] text-rose-700 bg-white/95 rounded-full px-2 py-0.5 shadow-sm">
-                    소아응급실
-                  </div>
-                </div>
-
-                {/* 현재 위치 마커 */}
-                <div className="absolute left-[30%] top-[70%] -translate-x-1/2 -translate-y-1/2">
-                  <div className="w-4 h-4 rounded-full bg-sky-500 text-white text-[10px] flex items-center justify-center shadow">
-                    ●
-                  </div>
-                  <div className="mt-1 text-[11px] text-slate-700 bg-white/95 rounded-full px-2 py-0.5 shadow-sm">
-                    현재 위치
-                  </div>
-                </div>
-
-                {/* 점선 경로 */}
-                <svg
-                  className="absolute inset-0 pointer-events-none"
-                  viewBox="0 0 100 100"
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.open(
+                      "https://mediboard.nemc.or.kr/emergency_room_in_hand",
+                      "_blank",
+                    );
+                  }}
+                  className="text-[11px] text-sky-600 font-medium"
                 >
-                  <path
-                    d="M30 70 C 40 60, 55 55, 68 38"
-                    fill="none"
-                    stroke="#fb7185"
-                    strokeWidth="2"
-                    strokeDasharray="3 3"
-                  />
-                </svg>
+                  전체보기
+                </button>
               </div>
-            </button>
+
+              {/* 범례 (원활 / 보통 / 혼잡) */}
+              <div className="flex items-center gap-2 text-[10px] text-slate-500">
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                  원활
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" />
+                  보통
+                </span>
+                <span className="flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full bg-rose-500" />
+                  혼잡
+                </span>
+              </div>
+
+              {/* 병원 리스트 */}
+              <div className="space-y-2.5">
+                {/* 병원 1 – 강남성심 (전체 원활) */}
+                <button
+                  type="button"
+                  className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
+                >
+                  {/* 좌측 정보 영역 */}
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                      <span className="text-[13px] font-semibold text-slate-900 truncate">
+                        강남성심병원
+                      </span>
+                    </div>
+                    <span className="block text-[11px] text-slate-500 truncate">
+                      서울특별시 영등포구 신길로 1 …
+                    </span>
+
+                    {/* 일반 / 소아 상태칩 */}
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        응급실일반
+                        <span className="font-semibold">원활 · 18 / 22</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
+                        응급실소아
+                        <span className="font-semibold">원활 · 2 / 2</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[11px] text-sky-600 font-medium mt-0.5">
+                      <span>길찾기</span>
+                      <span className="text-[13px]">›</span>
+                    </div>
+                  </div>
+
+                  {/* 우측 도넛 게이지 */}
+                  <DonutGauge label="원활" used={18} total={22} tone="good" />
+                </button>
+
+                {/* 병원 2 – 강남세브란스 (보통/혼잡 섞임) */}
+                <button
+                  type="button"
+                  className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
+                >
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-amber-500" />
+                      <span className="text-[13px] font-semibold text-slate-900 truncate">
+                        신촌세브란스병원
+                      </span>
+                    </div>
+                    <span className="block text-[11px] text-slate-500 truncate">
+                      서울특별시 서대문구 연세로 …
+                    </span>
+
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
+                        응급실일반
+                        <span className="font-semibold">혼잡 · 19 /39</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
+                        응급실소아
+                        <span className="font-semibold">보통 · 2 / 8</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[11px] text-sky-600 font-medium mt-0.5">
+                      <span>길찾기</span>
+                      <span className="text-[13px]">›</span>
+                    </div>
+                  </div>
+
+                  <DonutGauge label="보통" used={15} total={21} tone="mid" />
+                </button>
+                {/* 병원 3 – 건국대 (혼잡 + 소아 정보 없음) */}
+                <button
+                  type="button"
+                  className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
+                >
+                  <div className="flex-1 min-w-0 space-y-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span className="w-2 h-2 rounded-full bg-rose-500" />
+                      <span className="text-[13px] font-semibold text-slate-900 truncate">
+                        건국대병원
+                      </span>
+                    </div>
+                    <span className="block text-[11px] text-slate-500 truncate">
+                      서울특별시 광진구 능동로 …
+                    </span>
+
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
+                        응급실일반
+                        <span className="font-semibold">혼잡 · 23 / 24</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-50 text-slate-400 border border-slate-100">
+                        응급실소아
+                        <span className="font-semibold">정보 없음</span>
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1 text-[11px] text-sky-600 font-medium mt-0.5">
+                      <span>길찾기</span>
+                      <span className="text-[13px]">›</span>
+                    </div>
+                  </div>
+
+                  <DonutGauge label="혼잡" used={23} total={24} tone="bad" />
+                </button>
+              </div>
+
+              <p className="mt-1 text-[10px] text-slate-400">
+                * 병상 수 및 혼잡도는 시연용 예시 데이터입니다.
+              </p>
+            </div>
           </section>
         )}
       </div>
@@ -409,6 +505,75 @@ const VitalMini: React.FC<VitalMiniProps> = ({ label, value, status }) => {
     >
       <span className="text-[10px] text-slate-500">{label}</span>
       <span className={`text-[12px] font-semibold ${style.text}`}>{value}</span>
+    </div>
+  );
+};
+
+interface DonutGaugeProps {
+  label: string; // 원활 / 보통 / 혼잡
+  used: number; // 사용 중 병상 수
+  total: number; // 총 병상 수
+  tone: "good" | "mid" | "bad";
+}
+
+const DonutGauge: React.FC<DonutGaugeProps> = ({
+  label,
+  used,
+  total,
+  tone,
+}) => {
+  const ratio = total > 0 ? Math.min(Math.max(used / total, 0), 1) : 0;
+
+  const size = 32;
+  const strokeWidth = 4;
+  const r = (size - strokeWidth) / 2;
+  const c = 2 * Math.PI * r;
+  const offset = c * (1 - ratio);
+
+  const color = {
+    good: "#22c55e", // emerald
+    mid: "#f97316", // amber
+    bad: "#fb7185", // rose
+  }[tone];
+
+  return (
+    <div className="flex flex-col items-center gap-0.5">
+      <svg
+        width={size}
+        height={size}
+        viewBox={`0 0 ${size} ${size}`}
+        className="block"
+      >
+        <g transform={`rotate(-90 ${size / 2} ${size / 2})`}>
+          {/* 배경 원 */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke="#e5e7eb"
+            strokeWidth={strokeWidth}
+            fill="none"
+          />
+          {/* 채워진 도넛 */}
+          <circle
+            cx={size / 2}
+            cy={size / 2}
+            r={r}
+            stroke={color}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={c}
+            strokeDashoffset={offset}
+            strokeLinecap="round"
+          />
+        </g>
+      </svg>
+      <span className="text-[9px] font-semibold text-slate-600 leading-none">
+        {label}
+      </span>
+      <span className="text-[9px] text-slate-400 leading-none">
+        {used} / {total}
+      </span>
     </div>
   );
 };

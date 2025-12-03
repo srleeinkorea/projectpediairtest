@@ -157,7 +157,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       ({
         safe: {
           label: "현재 상태 안정적",
-          action: "가정 내 모니터링 유지",
+          action: "가정 내 경과 관찰 유지",
           gradient: "from-emerald-500 to-sky-500",
           glow: "from-emerald-100/40 to-sky-100/40",
         },
