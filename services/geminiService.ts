@@ -42,7 +42,7 @@ const SYSTEM_INSTRUCTION = `
 3) **📌 지금 할 일 (2~4줄)**
    - 예: "**석션(흡인)**을 시행한 뒤, **5~10분 동안 SpO₂와 호흡 상태**를 관찰해 주세요."
  
-   이름 틀리지 말도록 주의할 것
+   이름 틀리지 말도록 주의할 것!
 `;
 
 
@@ -59,6 +59,21 @@ export const generateMedicalAdvice = async (
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const context = `
+
+    [Patient Profile]
+- 환아 이름: ${patientData.name} (${patientData.age}세)
+- EMR 진단: ${patientData.emrDiagnosis}
+- Lung Compliance: ${patientData.compliance}
+
+[Real-time Vitals]
+- SpO2: ${patientData.spo2}% (Target: >95%, Danger: <90%)
+- Respiratory Rate (RR): ${patientData.rr} bpm
+- Ventilator: P-Peak ${patientData.p_peak_measured} (Limit: ${patientData.p_peak_threshold})
+
+[이름 사용 규칙]
+- 답변에서 아이를 부를 때는 **반드시 "${patientData.name}" 또는 "${patientData.name} 보호자님"**이라고만 부르세요.
+- "민성이"처럼 **다른 이름은 절대 사용하지 마세요.**
+
     [Patient Profile]
     - Name: ${patientData.name} (${patientData.age}yo)
     - Diagnosis: ${patientData.emrDiagnosis}
@@ -70,14 +85,14 @@ export const generateMedicalAdvice = async (
     - Ventilator: P-Peak ${patientData.p_peak_measured} (Limit: ${patientData.p_peak_threshold})
     `;
 
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: `System Context:\n${context}\n\nUser Query: ${query}`,
-      config: {
-        systemInstruction: SYSTEM_INSTRUCTION,
-        temperature: 0.3, 
-      },
-    });
+const response = await ai.models.generateContent({
+  model: "gemini-2.5-flash",
+  contents: `System Context:\n${context}\n\nUser Query: ${query}`,
+  config: {
+    systemInstruction: SYSTEM_INSTRUCTION,
+    temperature: 0.3,
+  },
+});
 
     return response.text || "죄송합니다. AI 응답을 불러올 수 없습니다.";
   } catch (error) {
