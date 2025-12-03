@@ -50,9 +50,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label, accent }) => {
   return (
     <div className="flex items-center gap-2">
       <div className={`w-[3px] h-4 rounded-full ${barColor}`} />
-      <span className="text-[12px] font-semibold text-slate-800">
-        {label}
-      </span>
+      <span className="text-[12px] font-semibold text-slate-800">{label}</span>
     </div>
   );
 };
@@ -91,27 +89,50 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
   return (
     <div className="h-full bg-slate-50 flex flex-col font-sans max-w-md mx-auto">
       {/* HEADER */}
-      <header className="px-4 py-2 bg-white border-b border-slate-100 flex items-center">
-  <button
-    type="button"
-    onClick={onBack}
-    className="p-1.5 -ml-1 text-slate-500 hover:text-slate-900 active:scale-95 transition min-w-[36px] min-h-[36px]"
-    aria-label="뒤로가기"
-  >
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-4 w-4"
-      viewBox="0 0 20 20"
-      fill="currentColor"
-    >
-      <path d="M12.7 5.3a1 1 0 010 1.4L9.4 10l3.3 3.3a1 1 0 01-1.4 1.4l-4-4a1 1 0 010-1.4l4-4a1 1 0 011.4 0z" />
-    </svg>
-  </button>
-  <h1 className="ml-1.5 text-[12px] font-medium text-slate-700 tracking-tight">
-    오늘 우리 아이 상태
-  </h1>
-</header>
 
+      {/* 상단 헤더 - 좌측 정렬, 작은 로고 텍스트 */}
+      <header className="px-3 py-1.5 flex items-center justify-start bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
+        <button
+          type="button"
+          onClick={onToggleStatus}
+          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
+          aria-label="홈으로 이동"
+        >
+          <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+            {/* 아이콘 박스 (그대로) */}
+            <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5 text-white"
+                aria-hidden="true"
+              >
+                <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
+                <path d="M15 12h.01"></path>
+                <path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path>
+                <path d="M9 12h.01"></path>
+              </svg>
+            </div>
+
+            {/* 텍스트 로고 + 서브카피 (더 작게, 좌측 정렬) */}
+            <div className="flex flex-col leading-tight items-start">
+              <span className="text-[11px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+                V.Doc PEDI-AIR
+              </span>
+              <span className="text-[9px] text-slate-500">
+                PEDIatric AI for Respiratory-care
+              </span>
+            </div>
+          </div>
+        </button>
+      </header>
 
       {/* BODY */}
       <div className="flex-1 overflow-y-auto p-5 space-y-5">
@@ -149,8 +170,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     patientData.spo2 < 90
                       ? "bad"
                       : patientData.spo2 < 94
-                      ? "warn"
-                      : "good"
+                        ? "warn"
+                        : "good"
                   }
                 />
                 <VitalMini
@@ -160,8 +181,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     patientData.rr > 40
                       ? "bad"
                       : patientData.rr > 30
-                      ? "warn"
-                      : "good"
+                        ? "warn"
+                        : "good"
                   }
                 />
                 <VitalMini
@@ -221,92 +242,91 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
         {/* EMERGENCY SECTION: 119 + 지도 */}
         {/* EMERGENCY SECTION: 119 + 지도 */}
-{isEmergency && (
-  <section
-    role="alert"
-    aria-live="assertive"
-    aria-atomic="true"
-    className="space-y-4"
-  >
-    {/* 119 바로 연결 버튼 */}
-    <button
-      type="button"
-      autoFocus
-      onClick={() => {
-        window.location.href = "tel:119";
-      }}
-      className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 text-white text-[15px] font-semibold shadow-[0_16px_34px_rgba(248,113,113,0.4)] active:scale-[0.97] transition min-h-[46px]"
-      aria-label="119 긴급 전화 걸기"
-    >
-      <span className="text-[18px]">🚨</span>
-      <span>119로 바로 전화하기</span>
-    </button>
+        {isEmergency && (
+          <section
+            role="alert"
+            aria-live="assertive"
+            aria-atomic="true"
+            className="space-y-4"
+          >
+            {/* 119 바로 연결 버튼 */}
+            <button
+              type="button"
+              autoFocus
+              onClick={() => {
+                window.location.href = "tel:119";
+              }}
+              className="w-full flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-2xl bg-gradient-to-r from-rose-600 to-red-500 text-white text-[15px] font-semibold shadow-[0_16px_34px_rgba(248,113,113,0.4)] active:scale-[0.97] transition min-h-[46px]"
+              aria-label="119 긴급 전화 걸기"
+            >
+              <span className="text-[18px]">🚨</span>
+              <span>119로 바로 전화하기</span>
+            </button>
 
-    {/* 소아응급실 지도 카드 – 텍스트 최소화, 지도 크게 */}
-    <button
-      type="button"
-      onClick={() => {
-        // 예: onNavigate("map") 또는 window.open(지도URL)
-      }}
-      className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm active:scale-[0.98] transition text-left space-y-2.5"
-      aria-label="가까운 소아응급실 지도 열기"
-    >
-      {/* 상단 한 줄 헤더 */}
-      <div className="flex items-center justify-between">
-        <span className="text-[13px] font-semibold text-slate-900">
-          가까운 소아응급실 지도
-        </span>
-        <span className="text-[11px] text-slate-400">열기</span>
-      </div>
+            {/* 소아응급실 지도 카드 – 텍스트 최소화, 지도 크게 */}
+            <button
+              type="button"
+              onClick={() => {
+                // 예: onNavigate("map") 또는 window.open(지도URL)
+              }}
+              className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm active:scale-[0.98] transition text-left space-y-2.5"
+              aria-label="가까운 소아응급실 지도 열기"
+            >
+              {/* 상단 한 줄 헤더 */}
+              <div className="flex items-center justify-between">
+                <span className="text-[13px] font-semibold text-slate-900">
+                  가까운 소아응급실 지도
+                </span>
+                <span className="text-[11px] text-slate-400">열기</span>
+              </div>
 
-      {/* 지도 느낌 나는 일러스트 영역 (더 크게) */}
-      <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mt-1.5">
-        {/* 간단한 격자/도로 느낌 */}
-        <div className="absolute inset-0 opacity-80">
-          <div className="absolute left-0 right-0 top-1/3 h-6 bg-white/80 border-y border-slate-200" />
-          <div className="absolute left-0 right-0 top-2/3 h-6 bg-white/80 border-y border-slate-200" />
-          <div className="absolute top-0 bottom-0 left-1/3 w-6 bg-white/80 border-x border-slate-200" />
-          <div className="absolute top-0 bottom-0 left-2/3 w-6 bg-white/80 border-x border-slate-200" />
-        </div>
+              {/* 지도 느낌 나는 일러스트 영역 (더 크게) */}
+              <div className="relative w-full h-40 rounded-xl overflow-hidden bg-slate-100 border border-slate-200 mt-1.5">
+                {/* 간단한 격자/도로 느낌 */}
+                <div className="absolute inset-0 opacity-80">
+                  <div className="absolute left-0 right-0 top-1/3 h-6 bg-white/80 border-y border-slate-200" />
+                  <div className="absolute left-0 right-0 top-2/3 h-6 bg-white/80 border-y border-slate-200" />
+                  <div className="absolute top-0 bottom-0 left-1/3 w-6 bg-white/80 border-x border-slate-200" />
+                  <div className="absolute top-0 bottom-0 left-2/3 w-6 bg-white/80 border-x border-slate-200" />
+                </div>
 
-        {/* 병원 마커 */}
-        <div className="absolute left-[68%] top-[38%] -translate-x-1/2 -translate-y-1/2">
-          <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-[11px] text-white shadow-md">
-            🏥
-          </div>
-          <div className="mt-1 text-[11px] text-rose-700 bg-white/95 rounded-full px-2 py-0.5 shadow-sm">
-            소아응급실
-          </div>
-        </div>
+                {/* 병원 마커 */}
+                <div className="absolute left-[68%] top-[38%] -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-7 h-7 rounded-full bg-rose-500 flex items-center justify-center text-[11px] text-white shadow-md">
+                    🏥
+                  </div>
+                  <div className="mt-1 text-[11px] text-rose-700 bg-white/95 rounded-full px-2 py-0.5 shadow-sm">
+                    소아응급실
+                  </div>
+                </div>
 
-        {/* 현재 위치 마커 */}
-        <div className="absolute left-[30%] top-[70%] -translate-x-1/2 -translate-y-1/2">
-          <div className="w-4 h-4 rounded-full bg-sky-500 text-white text-[10px] flex items-center justify-center shadow">
-            ●
-          </div>
-          <div className="mt-1 text-[11px] text-slate-700 bg-white/95 rounded-full px-2 py-0.5 shadow-sm">
-            현재 위치
-          </div>
-        </div>
+                {/* 현재 위치 마커 */}
+                <div className="absolute left-[30%] top-[70%] -translate-x-1/2 -translate-y-1/2">
+                  <div className="w-4 h-4 rounded-full bg-sky-500 text-white text-[10px] flex items-center justify-center shadow">
+                    ●
+                  </div>
+                  <div className="mt-1 text-[11px] text-slate-700 bg-white/95 rounded-full px-2 py-0.5 shadow-sm">
+                    현재 위치
+                  </div>
+                </div>
 
-        {/* 점선 경로 */}
-        <svg
-          className="absolute inset-0 pointer-events-none"
-          viewBox="0 0 100 100"
-        >
-          <path
-            d="M30 70 C 40 60, 55 55, 68 38"
-            fill="none"
-            stroke="#fb7185"
-            strokeWidth="2"
-            strokeDasharray="3 3"
-          />
-        </svg>
-      </div>
-    </button>
-  </section>
-)}
-
+                {/* 점선 경로 */}
+                <svg
+                  className="absolute inset-0 pointer-events-none"
+                  viewBox="0 0 100 100"
+                >
+                  <path
+                    d="M30 70 C 40 60, 55 55, 68 38"
+                    fill="none"
+                    stroke="#fb7185"
+                    strokeWidth="2"
+                    strokeDasharray="3 3"
+                  />
+                </svg>
+              </div>
+            </button>
+          </section>
+        )}
       </div>
     </div>
   );
@@ -391,9 +411,7 @@ const VitalMini: React.FC<VitalMiniProps> = ({ label, value, status }) => {
       `}
     >
       <span className="text-[10px] text-slate-500">{label}</span>
-      <span className={`text-[12px] font-semibold ${style.text}`}>
-        {value}
-      </span>
+      <span className={`text-[12px] font-semibold ${style.text}`}>{value}</span>
     </div>
   );
 };

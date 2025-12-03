@@ -84,11 +84,7 @@ const TrafficLightFace: React.FC<{
   }[type];
 
   return (
-    <div
-      className="relative group"
-      role="img"
-      aria-label={config.label}
-    >
+    <div className="relative group" role="img" aria-label={config.label}>
       {active && (
         <div
           className={`absolute -inset-0.5 bg-gradient-to-br ${config.glow} rounded-full blur-sm opacity-70 group-hover:opacity-90 transition-opacity duration-300`}
@@ -122,7 +118,7 @@ const renderFormattedText = (text: string) => {
       </strong>
     ) : (
       part
-    )
+    ),
   );
 };
 
@@ -152,7 +148,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
 
   const riskLevel = useMemo(
     () => getRiskLevel(patientData.spo2),
-    [patientData.spo2, getRiskLevel]
+    [patientData.spo2, getRiskLevel],
   );
 
   /** 위험도별 헤더 설정 */
@@ -177,8 +173,8 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           gradient: "from-rose-500 to-rose-600",
           glow: "from-rose-100/45 to-pink-100/45",
         },
-      }[riskLevel]),
-    [riskLevel]
+      })[riskLevel],
+    [riskLevel],
   );
 
   /** 초기 안내 문구 */
@@ -262,7 +258,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       const trimmed = text.trim();
 
       setSentQuestions((prev) =>
-        prev.includes(trimmed) ? prev : [...prev, trimmed]
+        prev.includes(trimmed) ? prev : [...prev, trimmed],
       );
 
       const userMsg: ChatMessage = {
@@ -306,7 +302,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         setIsLoading(false);
       }
     },
-    [patientData, isLoading]
+    [patientData, isLoading],
   );
 
   /** 피드백 토글 */
@@ -316,11 +312,11 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         prev.map((msg) =>
           msg.id === messageId
             ? { ...msg, feedback: msg.feedback === type ? undefined : type }
-            : msg
-        )
+            : msg,
+        ),
       );
     },
-    []
+    [],
   );
 
   const toggleEvidence = useCallback((id: string) => {
@@ -348,61 +344,64 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         "응급 상황 대비 물품 리스트 알려줘",
       ];
 
-      const baseList = data.spo2 < 90 ? emergencySuggestions : normalSuggestions;
+      const baseList =
+        data.spo2 < 90 ? emergencySuggestions : normalSuggestions;
       return baseList.filter((q) => !sentQuestions.includes(q));
     },
-    [sentQuestions]
+    [sentQuestions],
   );
 
   const suggestions = useMemo(
     () => getSuggestions(patientData),
-    [getSuggestions, patientData]
+    [getSuggestions, patientData],
   );
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 - 로고만 심플하게 */}
-      
-    <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
-  <button
-    type="button"
-    onClick={onToggleStatus}
-    className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
-    aria-label="홈으로 이동"
-  >
-    <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
-      {/* 아이콘 박스 (조금 더 작게) */}
-      <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-          className="w-5 h-5 text-white"
-          aria-hidden="true"
+
+      <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
+        <button
+          type="button"
+          onClick={onToggleStatus}
+          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
+          aria-label="홈으로 이동"
         >
-          <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
-          <path d="M15 12h.01"></path>
-          <path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path>
-          <path d="M9 12h.01"></path>
-        </svg>
-      </div>
+          <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+            {/* 아이콘 박스 (톤 유지) */}
+            <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5 text-white"
+                aria-hidden="true"
+              >
+                <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
+                <path d="M15 12h.01"></path>
+                <path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path>
+                <path d="M9 12h.01"></path>
+              </svg>
+            </div>
 
-      {/* 텍스트 로고 (폰트 살짝 줄임) */}
-      <span className="text-sm font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
-        V.Doc PEDI-AIR
-      </span>
-    </div>
-  </button>
-</header>
-
-
-
+            {/* 텍스트 로고 + 서브카피 */}
+            <div className="flex flex-col leading-tight">
+              <span className="text-[18px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+                V.Doc PEDI-AIR
+              </span>
+              <span className="text-[8px] text-slate-500">
+                PEDIatric AI for Respiratory-care
+              </span>
+            </div>
+          </div>
+        </button>
+      </header>
 
       {/* 위험도 헤더 */}
       <div className="relative z-20 shrink-0">
@@ -427,7 +426,10 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           >
             <div className="flex items-center space-x-2 bg-slate-50/80 backdrop-blur-sm px-2 py-1 rounded-full border border-slate-200/50 shadow-sm">
               <TrafficLightFace type="safe" active={riskLevel === "safe"} />
-              <TrafficLightFace type="warning" active={riskLevel === "warning"} />
+              <TrafficLightFace
+                type="warning"
+                active={riskLevel === "warning"}
+              />
               <TrafficLightFace type="danger" active={riskLevel === "danger"} />
             </div>
 
@@ -532,7 +534,9 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-3.5 w-3.5"
-                      fill={msg.feedback === "positive" ? "currentColor" : "none"}
+                      fill={
+                        msg.feedback === "positive" ? "currentColor" : "none"
+                      }
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       strokeWidth={2}
@@ -557,7 +561,9 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-3.5 w-3.5"
-                      fill={msg.feedback === "negative" ? "currentColor" : "none"}
+                      fill={
+                        msg.feedback === "negative" ? "currentColor" : "none"
+                      }
                       viewBox="0 0 24 24"
                       stroke="currentColor"
                       strokeWidth={2}
