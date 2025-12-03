@@ -15,25 +15,26 @@ const Layout: React.FC<LayoutProps> = ({
   return (
     /**
      * 바깥 래퍼
-     * - 모바일: 전체 화면을 채움
-     * - 데스크탑: 중앙에 "폰 프레임"처럼 보이도록 정렬
+     * - 모바일: 화면 전체를 채움
+     * - 데스크탑: 가운데에 "폰 1대" 사이즈로만 보이게
      */
-    <div className="min-h-[100dvh] w-full bg-slate-900 flex items-stretch justify-center">
-      {/* 실제 앱 프레임 */}
+    <div className="w-full min-h-[100dvh] bg-slate-900 flex items-center justify-center">
+      {/* 실제 앱이 보이는 폰 프레임 */}
       <div
         className="
-          relative w-full max-w-md
+          relative
+          w-full
+          max-w-[420px]           /* 브라우저에서 항상 이 정도 폭으로 제한 → 모바일 폭처럼 보이게 */
+          h-[100dvh]              /* 모바일일 때는 전체 높이 */
+          md:h-[844px]            /* 데스크탑에선 아이폰 수준 높이로 고정 */
+          md:rounded-[32px]       /* 데스크탑에서만 둥근 모서리 → 디바이스 느낌 */
           bg-slate-50
-          h-[100dvh]
-          sm:h-[90vh]
-          sm:my-4
-          sm:rounded-3xl
-          shadow-2xl
+          shadow-[0_24px_60px_rgba(15,23,42,0.5)]
           overflow-hidden
           flex flex-col
+          border border-slate-200/80
         "
         style={{
-          // iOS 등 노치 영역(Safe Area) 대응
           paddingTop: "env(safe-area-inset-top)",
           paddingBottom: "env(safe-area-inset-bottom)",
         }}
