@@ -226,9 +226,16 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       setIsLoading(true);
 
       try {
-        const aiResponseRaw = await generateMedicalAdvice(
-          trimmed,
-          patientData,
+       const effectiveName = childName || patientData.name;
+
+const aiResponseRaw = await generateMedicalAdvice(
+  trimmed,
+  {
+    ...patientData,
+    name: effectiveName,   // ★ 여기서 이름을 childName으로 덮어쓰기
+  } as PatientData,
+);
+
         );
         const aiResponse =
           typeof aiResponseRaw === "string" ? aiResponseRaw.trim() : "";
