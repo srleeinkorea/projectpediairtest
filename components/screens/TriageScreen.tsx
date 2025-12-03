@@ -19,7 +19,7 @@ const STATUS_CONFIG: Record<
   }
 > = {
   1: {
-    title: "지금은 비교적 안정적이에요",
+    title: "안정적인 경과를 보이고 있어요",
     desc: "현재 측정된 수치는 전반적으로 안전 범위 안에 있어요.",
     action: "지금처럼 집에서 처방받은 방법대로 관리해 주세요.",
     color: "mint",
