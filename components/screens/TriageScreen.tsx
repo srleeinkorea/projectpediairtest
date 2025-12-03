@@ -121,7 +121,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
             {/* 텍스트 로고 + 서브카피 */}
             <div className="flex flex-col leading-tight items-start">
-              <span className="text-[11px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+              <span className="text-[20px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
                 V.Doc PEDI-AIR
               </span>
               <span className="text-[9px] text-slate-500">
