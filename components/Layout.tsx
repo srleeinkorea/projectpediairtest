@@ -36,7 +36,7 @@ const Layout: React.FC<LayoutProps> = ({
         className={`
           relative
           w-full
-          max-w-[420px]
+          max-w-[400px]
           h-[100dvh]
           sm:h-[780px]
           bg-slate-50

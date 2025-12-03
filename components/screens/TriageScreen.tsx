@@ -71,7 +71,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
       return 3;
     }
     if (data.rr > 30 || data.spo2 < 94) {
-      return 2;
+      return 1;
     }
     return 1;
   };
@@ -445,8 +445,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               </div>
 
               <p className="mt-1 text-[10px] text-slate-400 leading-snug">
-                * 병상 수 및 혼잡도는 시연용 예시 데이터입니다. 실제 상황에서는
-                병원 안내와 119 지침을 우선으로 따라 주세요.
               </p>
             </div>
           </section>

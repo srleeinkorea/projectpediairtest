@@ -139,14 +139,12 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const isFirstRender = useRef(true);
 
-  /** 위험도 계산 */
   /** 위험도 계산 – 이 EMR 화면에서는 '주의' 단계 없이 안정/위험만 사용 */
-const getRiskLevel = useCallback((spo2: number) => {
-  // 90 미만이면 바로 '위험', 그 외에는 모두 '안정'
-  if (spo2 < 90) return "danger" as const;
-  return "safe" as const;
-}, []);
- 
+  const getRiskLevel = useCallback((spo2: number) => {
+    if (spo2 < 90) return "danger" as const;
+    return "safe" as const;
+  }, []);
+
   const riskLevel = useMemo(
     () => getRiskLevel(patientData.spo2),
     [patientData.spo2, getRiskLevel],
@@ -356,8 +354,17 @@ const getRiskLevel = useCallback((spo2: number) => {
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
-      {/* 상단 헤더 */}
-      <header className="px-3 py-1 flex items-center justify-center bg-white/90 backdrop-blur-xl border-b border-white/40 z-30 shrink-0 shadow-sm">
+      {/* 상단 헤더 – 여백 확대 */}
+      <header
+        className="
+          px-4 sm:px-5
+          py-2.5 sm:py-3
+          flex items-center justify-center
+          bg-white/90 backdrop-blur-xl
+          border-b border-white/40
+          z-30 shrink-0 shadow-sm
+        "
+      >
         <button
           type="button"
           onClick={onToggleStatus}
@@ -397,8 +404,8 @@ const getRiskLevel = useCallback((spo2: number) => {
         </button>
       </header>
 
-      {/* 위험도 헤더 – 여백을 슬림하게 정리 */}
-      <section className="px-3 pt-1.5 pb-1 shrink-0">
+      {/* 위험도 헤더 – 좌우 여백도 Layout과 맞춤 */}
+      <section className="px-4 sm:px-5 pt-2 pb-1.5 shrink-0">
         <button
           type="button"
           onClick={() => onNavigate("triage")}
@@ -408,13 +415,13 @@ const getRiskLevel = useCallback((spo2: number) => {
             bg-white/95
             border border-slate-100
             shadow-sm
-            px-2.5 py-1.5
+            px-2.5 py-1.75
             active:scale-[0.99]
             transition-all duration-150
           `}
           aria-label="상세 위험도 보기"
         >
-          {/* 신호등 아이콘 묶음 – 내부 여백도 줄임 */}
+          {/* 신호등 아이콘 묶음 */}
           <div className="flex items-center gap-1.5 bg-slate-50/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-slate-200/60">
             <TrafficLightFace type="safe" active={riskLevel === "safe"} />
             <TrafficLightFace type="warning" active={riskLevel === "warning"} />
@@ -443,9 +450,9 @@ const getRiskLevel = useCallback((spo2: number) => {
         </button>
       </section>
 
-      {/* 채팅 영역 – 전체 여백도 살짝 줄여 밀도 높임 */}
+      {/* 채팅 영역 – px를 4/5로 맞춰서 전체 라인 통일 */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-3 space-y-3"
+        className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-5 pt-2.5 pb-3.5 space-y-3"
         onClick={() => setShowMenu(false)}
       >
         {messages.map((msg) => {
@@ -592,11 +599,11 @@ const getRiskLevel = useCallback((spo2: number) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 하단 입력 영역 */}
-      <div className="relative bg-white/90 backdrop-blur-xl border-t border-white/40 px-3 pt-3 pb-4 shadow-2xl rounded-t-xl">
+      {/* 하단 입력 영역 – 상단과 좌우 여백 맞춤 */}
+      <div className="relative bg-white/90 backdrop-blur-xl border-t border-white/40 px-4 sm:px-5 pt-3.5 pb-4 shadow-2xl rounded-t-xl">
         {/* 플러스 버튼 메뉴 */}
         {showMenu && (
-          <div className="absolute bottom-full left-3 mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-2 min-w-[220px] z-50 space-y-3">
+          <div className="absolute bottom-full left-4 mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-2 min-w-[220px] z-50 space-y-3">
             {/* 상태 기록 입력 메뉴 */}
             <button
               type="button"
