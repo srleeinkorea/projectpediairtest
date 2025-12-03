@@ -1,4 +1,3 @@
-
 import React from "react";
 import { ScreenName } from "../types";
 
@@ -14,10 +13,11 @@ const Layout: React.FC<LayoutProps> = ({
   onNavigate,
 }) => {
   return (
-    // 전체 배경 + 가운데 정렬만 담당
-    <div className="min-h-screen bg-sky-50 flex justify-center px-3 sm:px-4 py-3 sm:py-4">
-      {/* 각 Screen 컴포넌트가 자체적으로 max-w-md / 카드 레이아웃을 가지고 있음 */}
-      <div className="w-full max-w-md">{children}</div>
+    <div className="min-h-screen bg-sky-50 flex justify-center px-3 py-3">
+      {/* 실제 폰 크기 느낌: 최소 360, 최대 414px 정도 */}
+      <div className="w-full max-w-[414px] min-w-[360px]">
+        {children}
+      </div>
     </div>
   );
 };

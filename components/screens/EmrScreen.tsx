@@ -25,20 +25,20 @@ const TrafficLightFace: React.FC<{
 }> = ({ type, active }) => {
   const config = {
     safe: {
-      gradient: "from-emerald-300 to-teal-400",
-      glow: "from-emerald-300/40 to-teal-300/40",
+      gradient: "from-emerald-400 to-emerald-500",
+      glow: "from-emerald-300/35 to-emerald-400/35",
       icon: "😊",
       label: "안전한 상태",
     },
     warning: {
-      gradient: "from-amber-300 to-orange-400",
-      glow: "from-amber-300/40 to-orange-300/40",
+      gradient: "from-amber-400 to-amber-500",
+      glow: "from-amber-300/35 to-amber-400/35",
       icon: "😐",
       label: "주의 상태",
     },
     danger: {
-      gradient: "from-rose-300 to-pink-400",
-      glow: "from-rose-300/40 to-pink-300/40",
+      gradient: "from-rose-400 to-rose-500",
+      glow: "from-rose-300/35 to-rose-400/35",
       icon: "😫",
       label: "위험 상태",
     },
@@ -58,8 +58,8 @@ const TrafficLightFace: React.FC<{
       <div
         className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
           active
-            ? `bg-gradient-to-br ${config.gradient} text-white shadow-md scale-110 ring-1 ring-white`
-            : "bg-slate-100 text-slate-300 opacity-60"
+            ? `bg-gradient-to-br ${config.gradient} text-white shadow-md scale-110 ring-1 ring-white/70`
+            : "bg-slate-100 text-slate-300 opacity-70"
         }`}
       >
         <span
@@ -123,20 +123,20 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         safe: {
           label: "현재 상태 안정적",
           action: "가정 내 모니터링 유지",
-          gradient: "from-emerald-200 to-teal-300",
-          glow: "from-emerald-100/30 to-teal-100/30",
+          gradient: "from-emerald-500 to-sky-500",
+          glow: "from-emerald-100/40 to-sky-100/40",
         },
         warning: {
           label: "주의 요망",
           action: "호흡수 변화 관찰 필요",
-          gradient: "from-amber-200 to-orange-300",
-          glow: "from-amber-100/30 to-orange-100/30",
+          gradient: "from-amber-500 to-orange-500",
+          glow: "from-amber-100/40 to-orange-100/40",
         },
         danger: {
           label: "즉시 대응 필요",
           action: "119 신고 및 응급실 이동",
-          gradient: "from-rose-200 to-pink-300",
-          glow: "from-rose-100/30 to-pink-100/30",
+          gradient: "from-rose-500 to-rose-600",
+          glow: "from-rose-100/45 to-pink-100/45",
         },
       }[riskLevel]),
     [riskLevel]
@@ -321,7 +321,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   );
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-br from-slate-50 via-sky-50/30 to-slate-100">
+    <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 (로고 자리 텍스트로 대체) */}
       <header className="px-4 py-2 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
         <button
@@ -342,21 +342,21 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       <div className="relative z-20 shrink-0">
         <div className="relative">
           <div
-            className={`absolute inset-0 bg-gradient-to-r ${headerConfig.glow} opacity-50`}
+            className={`absolute inset-0 bg-gradient-to-r ${headerConfig.glow} opacity-70`}
           />
           <button
             type="button"
             onClick={() => onNavigate("triage")}
-className={`
-  relative w-full px-3 py-2 flex items-center gap-2
-  backdrop-blur-sm border-b border-white/30 rounded-b-xl
-  transition-all duration-200 active:scale-[0.99]
-  ${
-    riskLevel === "danger"
-      ? "bg-rose-50 hover:bg-rose-100"
-      : "bg-white/90 hover:bg-white/95"
-  }
-`}
+            className={`
+              relative w-full px-3 py-2 flex items-center gap-2
+              backdrop-blur-sm border-b border-white/40 rounded-b-xl
+              transition-all duration-200 active:scale-[0.99]
+              ${
+                riskLevel === "danger"
+                  ? "bg-rose-50 hover:bg-rose-100"
+                  : "bg-white/95 hover:bg-white"
+              }
+            `}
             aria-label="상세 위험도 보기"
           >
             <div className="flex items-center space-x-2 bg-slate-50/80 backdrop-blur-sm px-2 py-1 rounded-full border border-slate-200/50 shadow-sm">
@@ -398,16 +398,13 @@ className={`
             >
               <div className="relative group max-w-[85%]">
                 {!isUser && (
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400/10 via-blue-400/10 to-cyan-400/10 rounded-3xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                )}
-                {isUser && (
-                  <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-300/20 to-blue-300/20 rounded-3xl blur-lg opacity-70" />
+                  <div className="absolute -inset-0.5 bg-sky-100/50 rounded-3xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 )}
                 <div
                   className={`relative px-4 py-3 text-sm leading-relaxed whitespace-pre-line shadow-lg transition-all duration-300 ${
                     isUser
-                      ? "bg-gradient-to-r from-sky-300 to-blue-400 text-white rounded-3xl rounded-tr-md font-medium"
-                      : "bg-white/95 backdrop-blur-md text-slate-800 border border-white/50 rounded-3xl rounded-tl-md"
+                      ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white rounded-3xl rounded-tr-md font-medium"
+                      : "bg-white/95 backdrop-blur-md text-slate-800 border border-slate-100 rounded-3xl rounded-tl-md"
                   }`}
                 >
                   {isUser ? msg.text : renderFormattedText(main)}
@@ -617,8 +614,8 @@ className={`
                     className="relative group whitespace-nowrap px-4 py-2.5 text-xs font-bold rounded-xl flex-shrink-0 transition-all duration-300"
                     aria-label={s}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-sky-100 to-blue-100 rounded-xl opacity-80 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-400/20 to-blue-400/20 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute inset-0 bg-sky-50 rounded-xl opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-sky-300/30 to-blue-300/30 rounded-xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                     <span className="relative bg-gradient-to-r from-sky-600 to-blue-600 bg-clip-text text-transparent">
                       {s}
                     </span>
@@ -697,7 +694,7 @@ className={`
               disabled={isLoading || !input.trim()}
               className={`relative p-3 rounded-xl flex-shrink-0 transition-all duration-200 ${
                 input.trim() && !isLoading
-                  ? "bg-gradient-to-r from-sky-400 to-blue-500 text-white shadow-lg hover:shadow-xl active:scale-95"
+                  ? "bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-lg hover:shadow-xl active:scale-95"
                   : "bg-slate-100 text-slate-300 cursor-not-allowed"
               }`}
               aria-label="메시지 전송"
