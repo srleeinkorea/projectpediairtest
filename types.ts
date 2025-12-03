@@ -16,6 +16,9 @@ export interface PatientData {
   rate_setting: number;
   patient_rate: number;
   compliance: string;
+    spo2: number;
+  rr: number;
+
 }
 
 export interface ChatMessage {

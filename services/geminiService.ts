@@ -1,4 +1,3 @@
-
 import { GoogleGenAI } from "@google/genai";
 import { PatientData } from "../types";
 
@@ -41,10 +40,7 @@ const SYSTEM_INSTRUCTION = `
 
 3) **📌 지금 할 일 (2~4줄)**
    - 예: "**석션(흡인)**을 시행한 뒤, **5~10분 동안 SpO₂와 호흡 상태**를 관찰해 주세요."
- 
-   이름 틀리지 말도록 주의할 것!
 `;
-
 
 export const generateMedicalAdvice = async (
   query: string,
@@ -59,50 +55,42 @@ export const generateMedicalAdvice = async (
     const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
 
     const context = `
-
-    [Patient Profile]
+[Patient Profile]
 - 환아 이름: ${patientData.name} (${patientData.age}세)
 - EMR 진단: ${patientData.emrDiagnosis}
 - Lung Compliance: ${patientData.compliance}
 
 [Real-time Vitals]
-- SpO2: ${patientData.spo2}% (Target: >95%, Danger: <90%)
+- SpO₂: ${patientData.spo2}% (Target: >95%, Danger: <90%)
 - Respiratory Rate (RR): ${patientData.rr} bpm
 - Ventilator: P-Peak ${patientData.p_peak_measured} (Limit: ${patientData.p_peak_threshold})
 
 [이름 사용 규칙]
 - 답변에서 아이를 부를 때는 **반드시 "${patientData.name}" 또는 "${patientData.name} 보호자님"**이라고만 부르세요.
 - "민성이"처럼 **다른 이름은 절대 사용하지 마세요.**
-
-    [Patient Profile]
-    - Name: ${patientData.name} (${patientData.age}yo)
-    - Diagnosis: ${patientData.emrDiagnosis}
-    - Lung Compliance: ${patientData.compliance}
-
-    [Real-time Vitals]
-    - SpO2: ${patientData.spo2}% (Target: >95%, Danger: <90%)
-    - Respiratory Rate (RR): ${patientData.rr} bpm
-    - Ventilator: P-Peak ${patientData.p_peak_measured} (Limit: ${patientData.p_peak_threshold})
     `;
 
-const response = await ai.models.generateContent({
-  model: "gemini-2.5-flash",
-  contents: `System Context:\n${context}\n\nUser Query: ${query}`,
-  config: {
-    systemInstruction: SYSTEM_INSTRUCTION,
-    temperature: 0.3,
-  },
-});
+    const response = await ai.models.generateContent({
+      model: "gemini-2.5-flash",
+      contents: `System Context:\n${context}\n\nUser Query: ${query}`,
+      config: {
+        systemInstruction: SYSTEM_INSTRUCTION,
+        temperature: 0.3,
+      },
+    });
 
+    // SDK 버전에 따라 response 구조가 다를 수 있어서
+    // 필요하면 여기 부분을 `response.response.text()`처럼 바꿔야 할 수도 있습니다.
+    // (지금 형태가 동작하고 있다면 그대로 두셔도 됩니다.)
+    // @ts-ignore
     return response.text || "죄송합니다. AI 응답을 불러올 수 없습니다.";
   } catch (error) {
     console.error("Gemini API Error or Demo Fallback:", error);
-    
-    // Fallback Mock Response for Demo purposes when API Key is missing or fails
+
     if (query.includes("가래") || query.includes("호흡")) {
-        return `(데모 모드: AI 연결 실패) 많이 걱정되시죠? 😢\n\n✅ **먼저 확인해주세요**\n1. **석션(흡인)**을 먼저 시행해주세요.\n2. 튜브가 꺾이지 않았는지 확인해주세요.\n\n증상이 계속되면 의료진에게 연락하세요!`;
+      return `(데모 모드: AI 연결 실패) 많이 걱정되시죠? 😢\n\n✅ **먼저 확인해주세요**\n1. **석션(흡인)**을 먼저 시행해주세요.\n2. 튜브가 꺾이지 않았는지 확인해주세요.\n\n증상이 계속되면 의료진에게 연락하세요!`;
     }
-    
+
     return `(데모 모드: AI 연결 실패) 현재 통신 상태가 원활하지 않아요. 😢\n\n✅ **권장 조치**\n1. 아이의 **호흡 상태**를 직접 확인해주세요.\n2. **산소포화도**가 90% 이상인지 체크해주세요.\n\n응급 상황이라면 즉시 119에 연락하세요!`;
   }
 };
