@@ -22,9 +22,8 @@ export interface PatientData {
   rate_setting: number;
   patient_rate: number;
   compliance: string;
-
-}
-
+  guardianName: string; 
+} 
 
 export interface ChatMessage {
   id: string;
