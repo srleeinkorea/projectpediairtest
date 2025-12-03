@@ -1,5 +1,11 @@
+// src/types.ts
+ export type ScreenName =
+  | "emr"
+  | "triage"
+  | "ventilator"
+  | "pro";
 
-export type ScreenName = 'home' | 'triage' | 'ventilator' | 'emr' | 'pro' | 'report' | 'clinic' | 'more';
+
 
 export interface PatientData {
   name: string;

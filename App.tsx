@@ -48,7 +48,7 @@ const App: React.FC = () => {
   // 네비게이션 상태
   const [currentScreen, setCurrentScreen] = useState<ScreenName>("emr");
 
-  // 현재 아기 이름 (민성이 위험 케이스는 데이터 쪽에서 유지)
+  // 현재 아기 이름
   const [childName, setChildName] = useState<string>(() =>
     pickRandomName(),
   );
@@ -129,7 +129,7 @@ const App: React.FC = () => {
             childName={childName}
             onToggleStatus={togglePatientStatus}
             onNavigate={navigateTo}
-            onRandomizeChild={handleRandomizeChild} // ★ 플러스 숨은 기능
+            onRandomizeChild={handleRandomizeChild}
           />
         );
       case "triage":
