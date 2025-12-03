@@ -184,7 +184,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                   }
                 />
                 <VitalMini
-                  label="피크압"
+                  label="PIP"
                   value={`${patientData.p_peak_measured}`}
                   status={
                     patientData.p_peak_measured > patientData.p_peak_threshold
