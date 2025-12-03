@@ -4,10 +4,13 @@ import { ScreenName } from "../types";
 
 interface LayoutProps {
   children: React.ReactNode;
-  activeScreen: ScreenName;
-  onNavigate: (screen: ScreenName) => void;
-  onChangeChild?: () => void;   // 상단 플러스 버튼용 (아기 변경)
-  childName?: string;           // 현재 아기 이름 표시용
+  // 향후 확장 대비: App에서 내려줄 수는 있지만, 지금은 사용하지 않으므로 선택 옵션으로만 둠
+  activeScreen?: ScreenName;
+  onNavigate?: (screen: ScreenName) => void;
+
+  // 아기 프로필 변경용
+  onChangeChild?: () => void;
+  childName?: string;
 }
 
 /**
@@ -17,8 +20,6 @@ interface LayoutProps {
  */
 const Layout: React.FC<LayoutProps> = ({
   children,
-  activeScreen, // 현재는 사용 안 하지만, 타입 유지
-  onNavigate,
   onChangeChild,
   childName,
 }) => {
@@ -39,30 +40,9 @@ const Layout: React.FC<LayoutProps> = ({
     >
       {/* 중앙 정렬 래퍼 */}
       <div className="relative flex justify-center items-center w-full max-w-[480px] pt-10 sm:pt-12">
-        {/* 🔝 상단 글로벌 로고 + 아기 변경 버튼 */}
-        <div className="absolute top-2 sm:top-0 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3">
-          {/* 홈 로고 버튼 */}
-          <button
-            type="button"
-            onClick={() => onNavigate("emr")} // 홈 역할: EMR 화면으로 이동
-            className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 backdrop-blur shadow-sm border border-slate-200 hover:bg-white active:scale-95 transition-all"
-            aria-label="홈 화면으로 이동"
-          >
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-300 to-sky-300 flex items-center justify-center text-[13px]">
-              👶
-            </div>
-            <div className="flex flex-col leading-tight">
-              <span className="text-[10px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
-                V.Doc
-              </span>
-              <span className="text-[13px] font-bold tracking-tight">
-                Pedi<span className="text-emerald-500">Air</span>
-              </span>
-            </div>
-          </button>
-
-          {/* 아기 변경 버튼 (플러스) – App에서 onChangeChild를 내려준 경우에만 표시 */}
-          {onChangeChild && (
+        {/* 🔝 상단 아기 변경 버튼 */}
+        {onChangeChild && (
+          <div className="absolute top-2 sm:top-0 left-1/2 -translate-x-1/2 z-40">
             <button
               type="button"
               onClick={onChangeChild}
@@ -79,27 +59,27 @@ const Layout: React.FC<LayoutProps> = ({
                 +
               </span>
             </button>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* 바닥에 살짝 떨어진 폰 그림자 (웹 전용) */}
         <div className="hidden sm:block absolute -bottom-6 inset-x-10 h-10 bg-slate-900/25 blur-2xl rounded-full pointer-events-none" />
 
         {/* 👉 스마트폰 프레임 + 화면 컨테이너 */}
         <div
-          className={`
+          className="
             relative
             w-full
             max-w-[370px]
             h-[100dvh]
             sm:h-auto
-            sm:aspect-[9/19.5]   /* 웹에서 9:19.5 정도 비율의 폰처럼 */
+            sm:aspect-[9/19.5]
             flex
             items-stretch
             justify-center
-          `}
+          "
         >
-          {/* 왼쪽 볼륨 버튼 2개 (웹에서만 보이게) */}
+          {/* 왼쪽 볼륨 버튼들 (웹에서만) */}
           <div className="hidden sm:block absolute -left-1 top-[32%] w-[3px] h-16 rounded-r-full bg-slate-500/85 shadow-sm" />
           <div className="hidden sm:block absolute -left-1 top-[52%] w-[3px] h-10 rounded-r-full bg-slate-500/75 shadow-sm" />
 
@@ -120,7 +100,7 @@ const Layout: React.FC<LayoutProps> = ({
               border border-slate-800/70
             "
           >
-            {/* 실제 화면 영역 (기존 카드) */}
+            {/* 실제 화면 영역 */}
             <div
               className="
                 relative
@@ -140,7 +120,7 @@ const Layout: React.FC<LayoutProps> = ({
               {/* 상단 카메라/스피커 바 느낌 (웹에서만) */}
               <div className="hidden sm:flex absolute top-1 left-1/2 -translate-x-1/2 h-4 w-24 rounded-full bg-slate-900/90" />
 
-              {/* 실제 화면 컨텐츠: 각 Screen 이 안에서 스크롤 관리 */}
+              {/* 실제 화면 컨텐츠 */}
               <main className="flex-1 relative overflow-hidden w-full flex flex-col">
                 {children}
               </main>

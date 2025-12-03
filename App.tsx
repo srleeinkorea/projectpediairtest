@@ -125,12 +125,12 @@ const App: React.FC = () => {
       case "emr":
         return (
           <EmrScreen
-  patientData={patientData}
-  childName={childName}
-  onToggleStatus={togglePatientStatus}
-  onNavigate={navigateTo}
-  onRandomizeChild={handleRandomizeChild}
-/>
+            patientData={patientData}
+            childName={childName}
+            onToggleStatus={togglePatientStatus}
+            onNavigate={navigateTo}
+            onRandomizeChild={handleRandomizeChild} // ★ 플러스 숨은 기능
+          />
         );
       case "triage":
         return (
@@ -171,7 +171,7 @@ const App: React.FC = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         title="상태 기록 (PRO)"
-        message="(준비 중)"
+        message="체온, 석션 횟수, 배변 양상 등을 기록하여 의료진과 공유합니다. (준비 중)"
       />
     </Layout>
   );

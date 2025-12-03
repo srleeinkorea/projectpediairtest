@@ -1,3 +1,4 @@
+// src/components/screens/TriageScreen.tsx
 import React from "react";
 import { ScreenName, PatientData } from "../../types";
 
@@ -8,6 +9,21 @@ interface TriageScreenProps {
 }
 
 type RiskLevel = 1 | 2 | 3;
+
+// 응급 레벨 계산
+const getRiskLevel = (data: PatientData): RiskLevel => {
+  if (
+    data.spo2 < 90 ||
+    data.rr > 40 ||
+    data.p_peak_measured > data.p_peak_threshold
+  ) {
+    return 3;
+  }
+  if (data.rr > 30 || data.spo2 < 94) {
+    return 2;
+  }
+  return 1;
+};
 
 const STATUS_CONFIG: Record<
   1 | 3,
@@ -60,24 +76,10 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label, accent }) => {
 const TriageScreen: React.FC<TriageScreenProps> = ({
   onBack,
   patientData,
-  onNavigate, // 시그니처 유지
+  onNavigate, // 시그니처만 유지
 }) => {
-  const getRiskLevel = (data: PatientData): RiskLevel => {
-    if (
-      data.spo2 < 90 ||
-      data.rr > 40 ||
-      data.p_peak_measured > data.p_peak_threshold
-    ) {
-      return 3;
-    }
-    if (data.rr > 30 || data.spo2 < 94) {
-      return 1;
-    }
-    return 1;
-  };
-
   const rawLevel = getRiskLevel(patientData);
-  const cardLevel: 1 | 3 = rawLevel === 3 ? 3 : 1;
+  const cardLevel: 1 | 3 = rawLevel === 3 ? 3 : 1; // 카드 색/메시지는 안정(1) vs 응급(3) 두 단계로만
 
   const status = STATUS_CONFIG[cardLevel];
   const styles = getStylesForColor(status.color);
@@ -90,76 +92,75 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
   return (
     <div className="h-full bg-slate-50 flex flex-col font-sans max-w-md mx-auto">
-      {/* HEADER */}
-      <header className="px-3 py-2 flex items-center justify-center bg-white/90 backdrop-blur-xl border-b border-slate-100 shadow-sm relative z-30 shrink-0">
-        {/* Back button */}
+      {/* HEADER – EMR과 동일 스타일, 클릭 시 EMR로 뒤로가기 */}
+      <header
+        className="
+          px-4 sm:px-5
+          py-2.5 sm:py-3
+          flex items-center justify-center
+          bg-white/90 backdrop-blur-xl
+          border-b border-white/40
+          z-30 shrink-0 shadow-sm
+        "
+      >
         <button
           type="button"
           onClick={onBack}
-          className="absolute left-3 flex items-center justify-center w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 active:scale-[0.96] transition"
+          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
           aria-label="이전 화면으로 이동"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="text-slate-700"
-          >
-            <polyline points="15 18 9 12 15 6" />
-          </svg>
+          <div className="flex items-center gap-2.5 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+            <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-5 h-5 text-white"
+                aria-hidden="true"
+              >
+                <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
+                <path d="M15 12h.01"></path>
+                <path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path>
+                <path d="M9 12h.01"></path>
+              </svg>
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-[17px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+                V.Doc PEDI-AIR
+              </span>
+              <span className="text-[8px] text-slate-500">
+                PEDIatric AI for Respiratory-care
+              </span>
+            </div>
+          </div>
         </button>
-
-        {/* 브랜드 로고 */}
-        <div className="flex items-center gap-2">
-          <div className="bg-indigo-600 p-1.5 rounded-xl shadow-sm">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="w-5 h-5 text-white"
-              aria-hidden="true"
-            >
-              <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
-              <path d="M15 12h.01"></path>
-              <path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path>
-              <path d="M9 12h.01"></path>
-            </svg>
-          </div>
-          <div className="flex flex-col leading-tight items-start">
-            <span className="text-[17px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
-              V.Doc PEDI-AIR
-            </span>
-            <span className="text-[9px] text-slate-500">
-              Pediatric AI for Respiratory-care
-            </span>
-          </div>
-        </div>
       </header>
 
       {/* BODY */}
       <main className="flex-1 overflow-y-auto p-5 space-y-5">
-        {/* STATUS CARD */}
+        {/* 1. 24시간 요약 + 숫자 카드 */}
         <section
           className={`bg-white rounded-3xl px-5 pt-5 pb-5 space-y-5 border ${cardAccentClass}`}
         >
-          {/* 1. 24시간 신호 리포트 + 숫자 */}
+          {/* 지난 24시간 건강 신호 요약 */}
           <div className="space-y-3">
             <SectionHeader
               label="지난 24시간 건강 신호 요약"
               accent={status.color}
             />
+            <p className="text-[11px] text-slate-500 leading-snug">
+              SpO₂, 호흡수, PIP를 바탕으로{" "}
+              <span className="font-semibold text-slate-700">
+                전체적인 위험도를 한눈에
+              </span>{" "}
+              볼 수 있어요.
+            </p>
 
             <div className="flex flex-col items-center justify-center pt-1 gap-3">
               {/* 얼굴 게이지 */}
@@ -183,7 +184,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     variant="rose"
                   />
                 </div>
-                {/* 게이지 라벨 */}
                 <div className="flex w-full justify-between text-[10px] text-slate-500">
                   <span className="w-1/3 text-left pl-1">안정</span>
                   <span className="w-1/3 text-center">주의</span>
@@ -191,7 +191,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 </div>
               </div>
 
-              {/* 숫자 요약: 3등분 */}
+              {/* 간단 Vital 미니 카드 */}
               <div className="grid w-full grid-cols-3 gap-2 mt-1.5">
                 <VitalMini
                   label="SpO₂"
@@ -228,7 +228,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
             </div>
           </div>
 
-          {/* 2. 상태 해석 */}
+          {/* 상태 해석 */}
           <div className="space-y-2.5">
             <SectionHeader label="상태 해석" accent={status.color} />
             <div>
@@ -251,9 +251,9 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
             </div>
           </div>
 
-          {/* 3. 보호자에게 권장되는 다음 행동 */}
+          {/* 보호자에게 권장되는 다음 행동 */}
           <div className="mt-1">
-          
+            <SectionHeader label="지금 권장되는 행동" accent={status.color} />
             <div
               className={`
                 mt-1 rounded-2xl px-3.5 py-3.5 flex items-center gap-3.5
@@ -267,12 +267,10 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 {status.action}
               </p>
             </div>
-            <p className="mt-2 text-[10px] text-slate-400 leading-snug"> 
-            </p>
           </div>
         </section>
 
-        {/* EMERGENCY SECTION: 119 + 응급실 리스트 */}
+        {/* 2. 응급 상황일 때만 119 + 응급실 리스트 */}
         {isEmergency && (
           <section
             role="alert"
@@ -293,15 +291,13 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               <span>119로 바로 전화하기</span>
             </button>
 
-            {/* 가까운 응급실 가용 병상 리스트 */}
+            {/* 가까운 소아응급실 리스트 */}
             <div className="w-full bg-white rounded-2xl p-4 border border-slate-200 shadow-sm space-y-3">
-              {/* 상단 헤더 + 범례 */}
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[13px] font-semibold text-slate-900">
                     가까운 소아응급실 안내
                   </span>
-
                 </div>
                 <button
                   type="button"
@@ -317,30 +313,13 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 </button>
               </div>
 
-              {/* 범례 (원활 / 보통 / 혼잡) */}
-              <div className="flex items-center gap-2 text-[10px] text-slate-500">
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  원활
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-amber-500" />
-                  보통
-                </span>
-                <span className="flex items-center gap-1">
-                  <span className="w-2 h-2 rounded-full bg-rose-500" />
-                  혼잡
-                </span>
-              </div>
-
-              {/* 병원 리스트 */}
+              {/* 병원 카드들 */}
               <div className="space-y-2.5">
-                {/* 병원 1 – 강남성심 (전체 원활) */}
+                {/* 병원 1 – 강남성심 */}
                 <button
                   type="button"
                   className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
                 >
-                  {/* 좌측 정보 영역 */}
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <div className="flex items-center gap-1.5">
                       <span className="w-2 h-2 rounded-full bg-emerald-500" />
@@ -351,8 +330,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     <span className="block text-[11px] text-slate-500 truncate">
                       서울특별시 영등포구 신길로 1 …
                     </span>
-
-                    {/* 일반 / 소아 상태칩 */}
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-100">
                         응급실일반
@@ -363,15 +340,11 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                         <span className="font-semibold">원활 · 2 / 2</span>
                       </span>
                     </div>
-
-                    
                   </div>
-
-                  {/* 우측 도넛 게이지 */}
                   <DonutGauge label="원활" used={18} total={22} tone="good" />
                 </button>
 
-                {/* 병원 2 – 신촌세브란스 (보통/혼잡 섞임) */}
+                {/* 병원 2 – 신촌세브란스 */}
                 <button
                   type="button"
                   className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
@@ -386,24 +359,21 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     <span className="block text-[11px] text-slate-500 truncate">
                       서울특별시 서대문구 연세로 …
                     </span>
-
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
                         응급실일반
-                        <span className="font-semibold">혼잡 · 19 /39</span>
+                        <span className="font-semibold">혼잡 · 19 / 39</span>
                       </span>
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-100">
                         응급실소아
                         <span className="font-semibold">보통 · 2 / 8</span>
                       </span>
                     </div>
-
-                    
                   </div>
-
                   <DonutGauge label="보통" used={15} total={21} tone="mid" />
                 </button>
-                {/* 병원 3 – 건국대 (혼잡 + 소아 정보 없음) */}
+
+                {/* 병원 3 – 건국대 */}
                 <button
                   type="button"
                   className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
@@ -418,7 +388,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     <span className="block text-[11px] text-slate-500 truncate">
                       서울특별시 광진구 능동로 …
                     </span>
-
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px] mt-0.5">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-100">
                         응급실일반
@@ -429,15 +398,14 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                         <span className="font-semibold">정보 없음</span>
                       </span>
                     </div>
-
-                   
                   </div>
-
                   <DonutGauge label="혼잡" used={23} total={24} tone="bad" />
                 </button>
               </div>
 
               <p className="mt-1 text-[10px] text-slate-400 leading-snug">
+                병상 정보는 중앙응급의료센터 기준이며 수 분 단위로
+                변경될 수 있어요. 도착 전 병원에 전화로 한 번 더 확인해 주세요.
               </p>
             </div>
           </section>
@@ -446,6 +414,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
     </div>
   );
 };
+
+// ===== 하위 컴포넌트들 =====
 
 interface GaugeFaceProps {
   active: boolean;
