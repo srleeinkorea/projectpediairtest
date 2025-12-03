@@ -123,8 +123,8 @@ const Dashboard: React.FC<DashboardProps> = ({
                 {isEmergency
                   ? "EMERGENCY"
                   : riskLevel === "yellow"
-                  ? "WARNING"
-                  : "STABLE"}
+                    ? "WARNING"
+                    : "STABLE"}
               </div>
               <h2 className="text-xl font-extrabold text-slate-900 tracking-tight mb-1 leading-snug">
                 {currentStatus.label}
@@ -173,9 +173,15 @@ const Dashboard: React.FC<DashboardProps> = ({
                 </div>
 
                 <div className="space-y-2.5 mb-4">
-                  <CheckItem text="환아 고개를 살짝 젖혀 기도를 확보해 주세요." light />
+                  <CheckItem
+                    text="환아 고개를 살짝 젖혀 기도를 확보해 주세요."
+                    light
+                  />
                   <CheckItem text="즉시 석션(Suction)을 시행해 주세요." light />
-                  <CheckItem text="튜브 연결부와 꼬임, 이탈 여부를 확인해 주세요." light />
+                  <CheckItem
+                    text="튜브 연결부와 꼬임, 이탈 여부를 확인해 주세요."
+                    light
+                  />
                 </div>
 
                 <button
@@ -202,8 +208,7 @@ const Dashboard: React.FC<DashboardProps> = ({
                 patientData.p_peak_measured > patientData.p_peak_threshold
               }
               desc={
-                patientData.p_peak_measured >
-                patientData.p_peak_threshold
+                patientData.p_peak_measured > patientData.p_peak_threshold
                   ? "기도 저항 상승"
                   : "허용 범위 내"
               }
@@ -215,9 +220,7 @@ const Dashboard: React.FC<DashboardProps> = ({
               value={patientData.spo2}
               unit="%"
               isDanger={patientData.spo2 < 90}
-              desc={
-                patientData.spo2 < 90 ? "저산소증 위험" : "허용 범위 내"
-              }
+              desc={patientData.spo2 < 90 ? "저산소증 위험" : "허용 범위 내"}
               onClick={() => onNavigate("ventilator")}
             />
           </div>
@@ -430,7 +433,11 @@ const VitalCard: React.FC<{
   );
 
   const Icon = type === "pressure" ? PressureIcon : SpO2Icon;
-  const accentColor = isDanger ? "rose" : type === "pressure" ? "sky" : "emerald";
+  const accentColor = isDanger
+    ? "rose"
+    : type === "pressure"
+      ? "sky"
+      : "emerald";
 
   const colorClasses: any = {
     rose: {
