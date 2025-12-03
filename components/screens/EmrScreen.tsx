@@ -363,17 +363,42 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
     <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 - 로고만 심플하게 */}
       <header className="px-4 py-2 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
-        <button
-          type="button"
-          onClick={onToggleStatus}
-          className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
-          aria-label="홈으로 이동"
+  <button
+    type="button"
+    onClick={onToggleStatus}
+    className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
+    aria-label="홈으로 이동"
+  >
+    <div className="flex items-center gap-2.5 transition-transform duration-300 group-hover:scale-[1.03] group-active:scale-95">
+      {/* 아이콘 박스 */}
+      <div className="bg-indigo-600 p-2 rounded-lg shadow-sm">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          className="lucide lucide-baby w-6 h-6 text-white"
+          aria-hidden="true"
         >
-          <div className="transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
-            <PediairLogo />
-          </div>
-        </button>
-      </header>
+          <path d="M10 16c.5.3 1.2.5 2 .5s1.5-.2 2-.5"></path>
+          <path d="M15 12h.01"></path>
+          <path d="M19.38 6.813A9 9 0 0 1 20.8 10.2a2 2 0 0 1 0 3.6 9 9 0 0 1-17.6 0 2 2 0 0 1 0-3.6A9 9 0 0 1 12 3c2 0 3.5 1.1 3.5 2.5s-.9 2.5-2 2.5c-.8 0-1.5-.4-1.5-1"></path>
+          <path d="M9 12h.01"></path>
+        </svg>
+      </div>
+
+      {/* 텍스트 로고 */}
+      <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+        V.Doc PEDI-AIR
+      </span>
+    </div>
+  </button>
+</header>
 
       {/* 위험도 헤더 */}
       <div className="relative z-20 shrink-0">
