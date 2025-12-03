@@ -260,10 +260,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
           {/* 3. 보호자에게 권장되는 다음 행동 */}
           <div className="mt-1">
-            <SectionHeader
-              label="지금 보호자님께 가장 중요한 안내"
-              accent={status.color}
-            />
+          
             <div
               className={`
                 mt-1 rounded-2xl px-3.5 py-3.5 flex items-center gap-3.5
@@ -277,9 +274,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 {status.action}
               </p>
             </div>
-            <p className="mt-2 text-[10px] text-slate-400 leading-snug">
-              * 앱 안내는 참고용이며, 보호자님의 판단이 불안하거나 아이가 평소와
-              다르게 힘들어 보이면 언제든지 의료진과 상의해 주세요.
+            <p className="mt-2 text-[10px] text-slate-400 leading-snug"> 
             </p>
           </div>
         </section>
@@ -311,11 +306,9 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               <div className="flex items-center justify-between">
                 <div className="flex flex-col gap-0.5">
                   <span className="text-[13px] font-semibold text-slate-900">
-                    가까운 소아응급실 가용 병상
+                    가까운 소아응급실 안내
                   </span>
-                  <span className="text-[10px] text-slate-400">
-                    중앙응급의료센터 공개 데이터 기반 예시입니다.
-                  </span>
+
                 </div>
                 <button
                   type="button"
@@ -378,10 +371,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[11px] text-sky-600 font-medium mt-0.5">
-                      <span>길찾기</span>
-                      <span className="text-[13px]">›</span>
-                    </div>
+                    
                   </div>
 
                   {/* 우측 도넛 게이지 */}
@@ -415,10 +405,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[11px] text-sky-600 font-medium mt-0.5">
-                      <span>길찾기</span>
-                      <span className="text-[13px]">›</span>
-                    </div>
+                    
                   </div>
 
                   <DonutGauge label="보통" used={15} total={21} tone="mid" />
@@ -450,10 +437,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-1 text-[11px] text-sky-600 font-medium mt-0.5">
-                      <span>길찾기</span>
-                      <span className="text-[13px]">›</span>
-                    </div>
+                   
                   </div>
 
                   <DonutGauge label="혼잡" used={23} total={24} tone="bad" />

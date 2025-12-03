@@ -18,7 +18,7 @@ interface EmrScreenProps {
   onNavigate: (screen: ScreenName) => void;
 }
 
-/** PediAir 로고 – 아기 느낌 버전 */
+/** PediAir 로고 – 아기 느낌 버전 (현재 헤더에는 미사용이지만 유지) */
 const PediairLogo: React.FC = () => (
   <div className="flex items-center gap-1.5">
     {/* 심볼: 아기 얼굴 + 숨 라인 */}
@@ -57,7 +57,7 @@ const PediairLogo: React.FC = () => (
   </div>
 );
 
-/** 상단 위험도 아이콘 (신호등 얼굴) */
+/** 상단 위험도 아이콘 (신호등 얼굴) – 여백 줄여서 더 컴팩트하게 */
 const TrafficLightFace: React.FC<{
   type: "safe" | "warning" | "danger";
   active: boolean;
@@ -91,14 +91,14 @@ const TrafficLightFace: React.FC<{
         />
       )}
       <div
-        className={`relative w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${
+        className={`relative rounded-full flex items-center justify-center transition-all duration-300 ${
           active
-            ? `bg-gradient-to-br ${config.gradient} text-white shadow-md scale-110 ring-1 ring-white/70`
-            : "bg-slate-100 text-slate-300 opacity-70"
+            ? `w-8 h-8 bg-gradient-to-br ${config.gradient} text-white shadow-md scale-105 ring-[0.5px] ring-white/70`
+            : "w-7 h-7 bg-slate-100 text-slate-300 opacity-70"
         }`}
       >
         <span
-          className={active ? "text-sm" : "text-xs opacity-70"}
+          className={active ? "text-[11px]" : "text-[10px] opacity-70"}
           aria-hidden="true"
         >
           {config.icon}
@@ -159,19 +159,16 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           label: "현재 상태 안정적",
           action: "가정 내 경과 관찰 유지",
           gradient: "from-emerald-500 to-sky-500",
-          glow: "from-emerald-100/40 to-sky-100/40",
         },
         warning: {
           label: "주의 요망",
-          action: "호흡수 변화 관찰 요",
+          action: "호흡수 변화와 청색증 여부 자주 확인",
           gradient: "from-amber-500 to-orange-500",
-          glow: "from-amber-100/40 to-orange-100/40",
         },
         danger: {
           label: "즉시 대응 필요",
           action: "119 신고 및 응급실 이동",
           gradient: "from-rose-500 to-rose-600",
-          glow: "from-rose-100/45 to-pink-100/45",
         },
       })[riskLevel],
     [riskLevel],
@@ -358,17 +355,15 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
-      {/* 상단 헤더 - 로고만 심플하게 */}
-
-      <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
+      {/* 상단 헤더 */}
+      <header className="px-3 py-1 flex items-center justify-center bg-white/90 backdrop-blur-xl border-b border-white/40 z-30 shrink-0 shadow-sm">
         <button
           type="button"
           onClick={onToggleStatus}
           className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
           aria-label="홈으로 이동"
         >
-          <div className="flex items-center gap-2 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
-            {/* 아이콘 박스 (톤 유지) */}
+          <div className="flex items-center gap-2.5 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
             <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -389,10 +384,8 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
                 <path d="M9 12h.01"></path>
               </svg>
             </div>
-
-            {/* 텍스트 로고 + 서브카피 */}
             <div className="flex flex-col leading-tight">
-              <span className="text-[18px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
+              <span className="text-[17px] font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
                 V.Doc PEDI-AIR
               </span>
               <span className="text-[8px] text-slate-500">
@@ -403,57 +396,55 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         </button>
       </header>
 
-      {/* 위험도 헤더 */}
-      <div className="relative z-20 shrink-0">
-        <div className="relative">
-          <div
-            className={`absolute inset-0 bg-gradient-to-r ${headerConfig.glow} opacity-70`}
-          />
-          <button
-            type="button"
-            onClick={() => onNavigate("triage")}
-            className={`
-              relative w-full px-3 py-2 flex items-center gap-2
-              backdrop-blur-sm border-b border-white/40 rounded-b-xl
-              transition-all duration-100 active:scale-[0.99]
-              ${
-                riskLevel === "danger"
-                  ? "bg-rose-50 hover:bg-rose-100"
-                  : "bg-white/95 hover:bg-white"
-              }
-            `}
-            aria-label="상세 위험도 보기"
-          >
-            <div className="flex items-center space-x-2 bg-slate-50/80 backdrop-blur-sm px-2 py-1 rounded-full border border-slate-200/50 shadow-sm">
-              <TrafficLightFace type="safe" active={riskLevel === "safe"} />
-              <TrafficLightFace
-                type="warning"
-                active={riskLevel === "warning"}
-              />
-              <TrafficLightFace type="danger" active={riskLevel === "danger"} />
-            </div>
+      {/* 위험도 헤더 – 여백을 슬림하게 정리 */}
+      <section className="px-3 pt-1.5 pb-1 shrink-0">
+        <button
+          type="button"
+          onClick={() => onNavigate("triage")}
+          className={`
+            w-full flex items-center gap-2.5
+            rounded-2xl
+            bg-white/95
+            border border-slate-100
+            shadow-sm
+            px-2.5 py-1.5
+            active:scale-[0.99]
+            transition-all duration-150
+          `}
+          aria-label="상세 위험도 보기"
+        >
+          {/* 신호등 아이콘 묶음 – 내부 여백도 줄임 */}
+          <div className="flex items-center gap-1.5 bg-slate-50/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-slate-200/60">
+            <TrafficLightFace type="safe" active={riskLevel === "safe"} />
+            <TrafficLightFace type="warning" active={riskLevel === "warning"} />
+            <TrafficLightFace type="danger" active={riskLevel === "danger"} />
+          </div>
 
-            <div className="flex-1 min-w-0">
-              <p
-                className={`text-sm font-extrabold bg-gradient-to-r ${headerConfig.gradient} bg-clip-text text-transparent truncate`}
-              >
-                {headerConfig.label}
-              </p>
-              <p className="text-xs text-slate-600 truncate font-medium">
-                {headerConfig.action}
-              </p>
-            </div>
+          {/* 텍스트 영역 */}
+          <div className="flex-1 min-w-0">
+            <p
+              className={`
+                text-[13px] font-extrabold truncate
+                bg-gradient-to-r ${headerConfig.gradient}
+                bg-clip-text text-transparent
+              `}
+            >
+              {headerConfig.label}
+            </p>
+            <p className="text-[11px] text-slate-600 truncate font-medium">
+              {headerConfig.action}
+            </p>
+          </div>
 
-            <div className="flex items-center justify-center text-slate-400">
-              <span className="text-base leading-none">›</span>
-            </div>
-          </button>
-        </div>
-      </div>
+          <div className="flex items-center justify-center text-slate-350">
+            <span className="text-sm leading-none">›</span>
+          </div>
+        </button>
+      </section>
 
-      {/* 채팅 영역 */}
+      {/* 채팅 영역 – 전체 여백도 살짝 줄여 밀도 높임 */}
       <div
-        className="flex-1 min-h-0 overflow-y-auto px-3 py-3 space-y-4"
+        className="flex-1 min-h-0 overflow-y-auto px-3 pt-2 pb-3 space-y-3"
         onClick={() => setShowMenu(false)}
       >
         {messages.map((msg) => {
@@ -466,7 +457,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
             >
               <div className="relative group max-w-[85%]">
                 {!isUser && (
-                  <div className="absolute -inset-0.5 bg-sky-100/50 rounded-3xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute -inset-0.5 bg-sky-100/40 rounded-3xl blur-md opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 )}
                 <div
                   className={`relative px-4 py-3 text-sm leading-relaxed whitespace-pre-line shadow-lg transition-all duration-300 ${
@@ -517,7 +508,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
                 </div>
               </div>
               {!isUser && (
-                <div className="flex items-center mt-2 ml-1.5 space-x-1.5">
+                <div className="flex items-center mt-1.5 ml-1.5 space-x-1.5">
                   <span className="text-[10px] text-slate-500 font-semibold">
                     답변이 도움이 되었나요?
                   </span>
@@ -601,7 +592,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       </div>
 
       {/* 하단 입력 영역 */}
-      <div className="relative bg-white/80 backdrop-blur-xl border-t border-white/30 p-3 pb-5 shadow-2xl rounded-t-xl">
+      <div className="relative bg-white/90 backdrop-blur-xl border-t border-white/40 px-3 pt-3 pb-4 shadow-2xl rounded-t-xl">
         {/* 플러스 버튼 메뉴 */}
         {showMenu && (
           <div className="absolute bottom-full left-3 mb-2 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl border border-white/50 p-2 min-w-[220px] z-50 space-y-3">
@@ -676,14 +667,14 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           messages.length > 0 &&
           messages[messages.length - 1].role === "model" &&
           suggestions.length > 0 && (
-            <div className="mb-3">
-              <div className="flex overflow-x-auto space-x-3 py-1.5 scrollbar-hide">
+            <div className="mb-2.5">
+              <div className="flex overflow-x-auto space-x-3 py-1 scrollbar-hide">
                 {suggestions.map((s) => (
                   <button
                     key={s}
                     type="button"
                     onClick={() => handleSend(s)}
-                    className="relative group whitespace-nowrap px-4 py-2.5 text-xs font-bold rounded-xl flex-shrink-0 transition-all duration-300"
+                    className="relative group whitespace-nowrap px-4 py-2 text-[11px] font-bold rounded-xl flex-shrink-0 transition-all duration-300"
                     aria-label={s}
                   >
                     <div className="absolute inset-0 bg-sky-50 rounded-xl opacity-90 group-hover:opacity-100 transition-opacity duration-300" />
