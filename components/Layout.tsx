@@ -40,27 +40,7 @@ const Layout: React.FC<LayoutProps> = ({
     >
       {/* 중앙 정렬 래퍼 */}
       <div className="relative flex justify-center items-center w-full max-w-[480px] pt-10 sm:pt-12">
-        {/* 🔝 상단 아기 변경 버튼 */}
-        {onChangeChild && (
-          <div className="absolute top-2 sm:top-0 left-1/2 -translate-x-1/2 z-40">
-            <button
-              type="button"
-              onClick={onChangeChild}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-white/90 backdrop-blur border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition-all"
-              aria-label="아기 프로필 변경"
-            >
-              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-200 to-emerald-200 flex items-center justify-center text-[11px]">
-                🙂
-              </div>
-              <span className="text-[11px] font-medium text-slate-700">
-                {displayChildName}
-              </span>
-              <span className="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-[12px] text-slate-600">
-                +
-              </span>
-            </button>
-          </div>
-        )}
+           
 
         {/* 바닥에 살짝 떨어진 폰 그림자 (웹 전용) */}
         <div className="hidden sm:block absolute -bottom-6 inset-x-10 h-10 bg-slate-900/25 blur-2xl rounded-full pointer-events-none" />

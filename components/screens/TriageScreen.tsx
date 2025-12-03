@@ -1,5 +1,5 @@
 // src/components/screens/TriageScreen.tsx
-import React from "react";
+import React, { useState } from "react";
 import { ScreenName, PatientData } from "../../types";
 
 interface TriageScreenProps {
@@ -79,7 +79,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
   onNavigate, // 시그니처만 유지
 }) => {
   const rawLevel = getRiskLevel(patientData);
-  const cardLevel: 1 | 3 = rawLevel === 3 ? 3 : 1; // 카드 색/메시지는 안정(1) vs 응급(3) 두 단계로만
+  const cardLevel: 1 | 3 = rawLevel === 3 ? 3 : 1; // 카드 색/메시지는 안정(1) vs 응급(3) 두 단계만
 
   const status = STATUS_CONFIG[cardLevel];
   const styles = getStylesForColor(status.color);
@@ -90,9 +90,21 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
       ? "border-emerald-100 shadow-[0_16px_32px_rgba(16,185,129,0.10)]"
       : "border-rose-100 shadow-[0_16px_32px_rgba(244,63,94,0.16)]";
 
+  // 📞 병원 전화 연결용 하단 시트 상태
+  const [phoneSheet, setPhoneSheet] = useState<{
+    name: string;
+    phone: string;
+  } | null>(null);
+
+  const handleCallConfirm = () => {
+    if (!phoneSheet) return;
+    window.location.href = `tel:${phoneSheet.phone}`;
+    setPhoneSheet(null);
+  };
+
   return (
-    <div className="h-full bg-slate-50 flex flex-col font-sans max-w-md mx-auto">
-      {/* HEADER – EMR과 동일 스타일, 클릭 시 EMR로 뒤로가기 */}
+    <div className="h-full bg-slate-50 flex flex-col font-sans max-w-md mx-auto relative">
+      {/* HEADER – EMR과 동일 스타일, 클릭 시 뒤로가기 */}
       <header
         className="
           px-4 sm:px-5
@@ -253,7 +265,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
 
           {/* 보호자에게 권장되는 다음 행동 */}
           <div className="mt-1">
-            <SectionHeader label="지금 권장되는 행동" accent={status.color} />
             <div
               className={`
                 mt-1 rounded-2xl px-3.5 py-3.5 flex items-center gap-3.5
@@ -319,6 +330,12 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 <button
                   type="button"
                   className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
+                  onClick={() =>
+                    setPhoneSheet({
+                      name: "강남성심병원",
+                      phone: "02-829-5000",
+                    })
+                  }
                 >
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <div className="flex items-center gap-1.5">
@@ -348,6 +365,12 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 <button
                   type="button"
                   className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
+                  onClick={() =>
+                    setPhoneSheet({
+                      name: "신촌세브란스병원",
+                      phone: "02-2228-5800",
+                    })
+                  }
                 >
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <div className="flex items-center gap-1.5">
@@ -377,6 +400,12 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                 <button
                   type="button"
                   className="w-full rounded-xl border border-slate-100 px-3 py-2.5 hover:bg-slate-50/90 active:scale-[0.99] transition flex items-center justify-between gap-3 text-left"
+                  onClick={() =>
+                    setPhoneSheet({
+                      name: "건국대병원",
+                      phone: "02-2030-5114",
+                    })
+                  }
                 >
                   <div className="flex-1 min-w-0 space-y-1.5">
                     <div className="flex items-center gap-1.5">
@@ -411,6 +440,40 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
           </section>
         )}
       </main>
+
+      {/* 📞 전화 연결 확인 시트 (하단 모달) */}
+      {phoneSheet && (
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-black/30">
+          <div className="w-full max-w-md bg-white rounded-t-3xl px-5 pt-4 pb-5 shadow-xl">
+            <div className="mb-3">
+              <p className="text-[14px] font-semibold text-slate-900">
+                {phoneSheet.name} 응급실로 전화하시겠어요?
+              </p>
+              <p className="mt-1 text-[12px] text-slate-500 leading-snug">
+                통화 후에도 아이 상태가 급격히 나빠지면{" "}
+                <span className="font-semibold">119 신고</span>도 함께
+                고려해 주세요.
+              </p>
+            </div>
+            <div className="flex gap-2 mt-3">
+              <button
+                type="button"
+                onClick={() => setPhoneSheet(null)}
+                className="flex-1 h-10 rounded-xl border border-slate-200 bg-white text-[13px] font-medium text-slate-700 hover:bg-slate-50 active:scale-[0.98] transition"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                onClick={handleCallConfirm}
+                className="flex-1 h-10 rounded-xl bg-sky-600 text-white text-[13px] font-semibold hover:bg-sky-700 active:scale-[0.98] transition"
+              >
+                전화 연결 ({phoneSheet.phone})
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
