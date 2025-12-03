@@ -344,6 +344,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   return (
     <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 (로고 자리 텍스트로 대체) */}
+            {/* 상단 헤더 (브랜드 로고) */}
       <header className="px-4 py-2 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
         <button
           type="button"
@@ -351,13 +352,12 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
           aria-label="홈으로 이동"
         >
-          <div className="transition-transform duration-300 group-hover:scale-[1.03] group-active:scale-95">
-            <span className="text-base font-extrabold tracking-tight bg-gradient-to-r from-sky-500 to-blue-600 bg-clip-text text-transparent">
-              V.Doc PEDI-AIR
-            </span>
+          <div className="transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
+            <PediairLogo />
           </div>
         </button>
       </header>
+
 
       {/* 위험도 헤더 */}
       <div className="relative z-20 shrink-0">
