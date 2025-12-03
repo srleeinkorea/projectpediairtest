@@ -363,7 +363,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
     <div className="h-full flex flex-col bg-slate-50">
       {/* 상단 헤더 - 로고만 심플하게 */}
       
-      <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
+    <header className="px-3 py-1.5 flex items-center justify-center bg-white/80 backdrop-blur-xl border-b border-white/30 z-30 shrink-0 shadow-sm">
   <button
     type="button"
     onClick={onToggleStatus}
@@ -400,6 +400,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
     </div>
   </button>
 </header>
+
 
 
 
