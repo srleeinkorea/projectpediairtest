@@ -42,12 +42,26 @@ const TrafficLightFace: React.FC<{
   }[type];
 
   return (
-    <div className="relative group" role="img" aria-label={config.label}>
+    <div
+      className="relative flex items-center justify-center group"
+      role="img"
+      aria-label={config.label}
+    >
+      {/* ✨ 활성일 때 반짝이는 오라 + 퍼지는 링 */}
       {active && (
-        <div
-          className={`absolute -inset-0.5 bg-gradient-to-br ${config.glow} rounded-full blur-sm opacity-70 group-hover:opacity-90 transition-opacity duration-300`}
-        />
+        <>
+          {/* 안쪽 부드러운 빛깔 (살짝 숨쉬는 느낌) */}
+          <div
+            className={`absolute -inset-1 rounded-full bg-gradient-to-br ${config.glow} blur-md opacity-70 animate-pulse`}
+          />
+          {/* 바깥으로 퍼져나가는 링 */}
+          <div
+            className="absolute -inset-2 rounded-full border border-white/60 opacity-60 animate-ping"
+          />
+        </>
       )}
+
+      {/* 실제 얼굴 아이콘 */}
       <div
         className={`relative rounded-full flex items-center justify-center transition-all duration-300 ${
           active
@@ -65,6 +79,7 @@ const TrafficLightFace: React.FC<{
     </div>
   );
 };
+
 
 const renderFormattedText = (text: string) => {
   const parts = text.split(/\*\*(.*?)\*\*/g);
@@ -367,12 +382,13 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         </button>
       </header>
 
-      <section className="px-4 sm:px-5 pt-2 pb-1.5 shrink-0">
+      
+            <section className="px-4 sm:px-5 pt-2 pb-1.5 shrink-0">
         <button
           type="button"
           onClick={() => onNavigate("triage")}
           className="
-            w-full flex items-center gap-2.5
+            w-full flex items-center
             rounded-2xl
             bg-white/95
             border border-slate-100
@@ -383,32 +399,79 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           "
           aria-label="상세 위험도 보기"
         >
+          {/* 왼쪽: 신호등 */}
           <div className="flex items-center gap-1.5 bg-slate-50/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-slate-200/60">
             <TrafficLightFace type="safe" active={riskLevel === "safe"} />
             <TrafficLightFace type="warning" active={riskLevel === "warning"} />
             <TrafficLightFace type="danger" active={riskLevel === "danger"} />
           </div>
 
-          <div className="flex-1 min-w-0">
-            <p
-              className={`
-                text-[13px] font-extrabold truncate
-                bg-gradient-to-r ${headerConfig.gradient}
-                bg-clip-text text-transparent
-              `}
-            >
-              {headerConfig.label}
-            </p>
-            <p className="text-[11px] text-slate-600 truncate font-medium">
-              {headerConfig.action}
-            </p>
-          </div>
+          {/* 가운데 여백 */}
+          <div className="flex-1" />
 
-          <div className="flex items-center justify-center text-slate-350">
-            <span className="text-sm leading-none">›</span>
+          {/* 오른쪽: 상태 배지 + 화살표 */}
+          <div className="flex items-center gap-2">
+            {riskLevel === "safe" && (
+              <span
+                className="
+                  inline-flex items-center px-3 py-1
+                  rounded-full text-[10px] font-extrabold
+                  bg-emerald-50 text-emerald-700
+                  border border-emerald-200
+                  tracking-tight
+                "
+              >
+                건강위험등 안정신호
+              </span>
+            )}
+
+            {riskLevel === "warning" && (
+              <span
+                className="
+                  inline-flex items-center px-3 py-1
+                  rounded-full text-[10px] font-extrabold
+                  bg-amber-50 text-amber-700
+                  border border-amber-200
+                  tracking-tight
+                "
+              >
+                주의 상태
+              </span>
+            )}
+
+            {riskLevel === "danger" && (
+              <span className="relative inline-flex items-center">
+                {/* 반짝이는 붉은 오라 */}
+                <span
+                  className="
+                    absolute -inset-1 rounded-full
+                    bg-gradient-to-r from-rose-400/60 to-red-500/60
+                    blur-md opacity-80
+                    animate-pulse
+                  "
+                />
+                {/* 실제 RED SIGN 배지 */}
+                <span
+                  className="
+                    relative inline-flex items-center px-3 py-1
+                    rounded-full text-[10px] font-extrabold
+                    bg-gradient-to-r from-rose-500 to-red-600
+                    text-white shadow-md border border-rose-200/80
+                    tracking-tight
+                  "
+                >
+                  건강 위험등 위험신호
+                </span>
+              </span>
+            )}
+
+            <span className="text-sm leading-none text-slate-350">›</span>
           </div>
         </button>
       </section>
+
+
+
 
       <div
         className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-5 pt-2.5 pb-3.5 space-y-3"

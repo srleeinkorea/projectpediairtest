@@ -38,8 +38,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           className="
             relative
             w-full
-            max-w-[370px]
-            h-[calc(100dvh-2rem)]   /* 화면 상하에 여유 두고 맞추기 */
+            max-w-[390px]
+            h-[calc(100dvh-1rem)]   /* 화면 상하에 여유 두고 맞추기 */
             sm:h-auto
             sm:aspect-[9/19.5]
             flex
