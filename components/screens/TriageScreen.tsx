@@ -160,13 +160,6 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               label="지난 24시간 건강 신호 요약"
               accent={status.color}
             />
-            <p className="text-[11px] text-slate-500 leading-snug">
-              SpO₂, 호흡수, PIP를 바탕으로{" "}
-              <span className="font-semibold text-slate-700">
-                전체적인 위험도를 한눈에
-              </span>{" "}
-              볼 수 있어요.
-            </p>
 
             <div className="flex flex-col items-center justify-center pt-1 gap-3">
               {/* 얼굴 게이지 */}

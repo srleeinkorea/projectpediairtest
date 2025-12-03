@@ -1,3 +1,4 @@
+// src/components/Layout.tsx
 import React from "react";
 import { ScreenName } from "../types";
 
@@ -5,6 +6,8 @@ interface LayoutProps {
   children: React.ReactNode;
   activeScreen: ScreenName;
   onNavigate: (screen: ScreenName) => void;
+  onChangeChild?: () => void;   // 상단 플러스 버튼용 (아기 변경)
+  childName?: string;           // 현재 아기 이름 표시용
 }
 
 /**
@@ -14,9 +17,13 @@ interface LayoutProps {
  */
 const Layout: React.FC<LayoutProps> = ({
   children,
-  activeScreen,
+  activeScreen, // 현재는 사용 안 하지만, 타입 유지
   onNavigate,
+  onChangeChild,
+  childName,
 }) => {
+  const displayChildName = childName ?? "우리 아이";
+
   return (
     <div
       className="
@@ -31,7 +38,50 @@ const Layout: React.FC<LayoutProps> = ({
       "
     >
       {/* 중앙 정렬 래퍼 */}
-      <div className="relative flex justify-center items-center w-full max-w-[480px]">
+      <div className="relative flex justify-center items-center w-full max-w-[480px] pt-10 sm:pt-12">
+        {/* 🔝 상단 글로벌 로고 + 아기 변경 버튼 */}
+        <div className="absolute top-2 sm:top-0 left-1/2 -translate-x-1/2 z-40 flex items-center gap-3">
+          {/* 홈 로고 버튼 */}
+          <button
+            type="button"
+            onClick={() => onNavigate("emr")} // 홈 역할: EMR 화면으로 이동
+            className="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-white/80 backdrop-blur shadow-sm border border-slate-200 hover:bg-white active:scale-95 transition-all"
+            aria-label="홈 화면으로 이동"
+          >
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-emerald-300 to-sky-300 flex items-center justify-center text-[13px]">
+              👶
+            </div>
+            <div className="flex flex-col leading-tight">
+              <span className="text-[10px] font-semibold tracking-[0.16em] text-slate-500 uppercase">
+                V.Doc
+              </span>
+              <span className="text-[13px] font-bold tracking-tight">
+                Pedi<span className="text-emerald-500">Air</span>
+              </span>
+            </div>
+          </button>
+
+          {/* 아기 변경 버튼 (플러스) – App에서 onChangeChild를 내려준 경우에만 표시 */}
+          {onChangeChild && (
+            <button
+              type="button"
+              onClick={onChangeChild}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-2xl bg-white/90 backdrop-blur border border-slate-200 shadow-sm hover:bg-slate-50 hover:border-slate-300 active:scale-95 transition-all"
+              aria-label="아기 프로필 변경"
+            >
+              <div className="w-5 h-5 rounded-full bg-gradient-to-br from-sky-200 to-emerald-200 flex items-center justify-center text-[11px]">
+                🙂
+              </div>
+              <span className="text-[11px] font-medium text-slate-700">
+                {displayChildName}
+              </span>
+              <span className="w-5 h-5 rounded-full border border-slate-300 flex items-center justify-center text-[12px] text-slate-600">
+                +
+              </span>
+            </button>
+          )}
+        </div>
+
         {/* 바닥에 살짝 떨어진 폰 그림자 (웹 전용) */}
         <div className="hidden sm:block absolute -bottom-6 inset-x-10 h-10 bg-slate-900/25 blur-2xl rounded-full pointer-events-none" />
 
@@ -72,7 +122,7 @@ const Layout: React.FC<LayoutProps> = ({
           >
             {/* 실제 화면 영역 (기존 카드) */}
             <div
-              className={`
+              className="
                 relative
                 w-full
                 h-full
@@ -81,7 +131,7 @@ const Layout: React.FC<LayoutProps> = ({
                 overflow-hidden
                 rounded-[24px]
                 border border-slate-200/80
-              `}
+              "
               style={{
                 paddingTop: "env(safe-area-inset-top)",
                 paddingBottom: "env(safe-area-inset-bottom)",

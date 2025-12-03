@@ -1,3 +1,4 @@
+// src/components/screens/EmrScreen.tsx
 import React, {
   useState,
   useRef,
@@ -16,6 +17,8 @@ interface EmrScreenProps {
   patientData: PatientData;
   onToggleStatus: () => void;
   onNavigate: (screen: ScreenName) => void;
+  childName: string;            // 현재 아기 이름
+  onRandomizeChild: () => void; // 이름 랜덤 변경 함수
 }
 
 /** PediAir 로고 – 아기 느낌 버전 (현재 헤더에는 미사용이지만 유지) */
@@ -126,7 +129,10 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   patientData,
   onToggleStatus,
   onNavigate,
+  childName,
+  onRandomizeChild,
 }) => {
+
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -173,12 +179,13 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
     [riskLevel],
   );
 
-  /** 초기 안내 문구 */
-  const getInitialMessage = useCallback((data: PatientData) => {
-    const childName =
-      (data as any).name && typeof (data as any).name === "string"
-        ? (data as any).name
-        : "아이";
+  /** 초기 안내 문구 – childName 기준으로 표시 */
+  /** 초기 안내 문구 – childName 기준으로 표시 */
+const getInitialMessage = useCallback(
+  (data: PatientData) => {
+    // ★ 이제는 무조건 childName을 사용해서 이름 표시
+    const effectiveChildName = childName || "아이";
+
     const guardianName =
       (data as any).guardianName &&
       typeof (data as any).guardianName === "string"
@@ -186,7 +193,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         : "보호자님";
 
     if (data.spo2 < 90) {
-      return `${childName} ${guardianName}, **산소포화도 저하(${data.spo2}%)** 알람이 1분 이상 감지되어 연락드려요.
+      return `${effectiveChildName} ${guardianName}, **산소포화도 저하(${data.spo2}%)** 알람이 1분 이상 감지되어 연락드려요.
 
 현재 **호흡수(RR)가 ${data.rr}회**로 높고, 수치를 볼 때 **가래 등 분비물이 기도를 좁게 만들어 발생할 수 있는 현상**이에요.
 
@@ -199,29 +206,42 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
 💡 **잠깐, 왜 그럴까요?**
 가래가 기도를 막으면 공기 흐름이 차단되어 산소 수치가 급격히 떨어질 수 있습니다. 석션 후 수치 변화를 지켜봐주세요.`;
     }
-    return `안녕하세요. 현재 수빈이의 호흡 상태를 실시간 모니터링 중입니다.
 
+    return `안녕하세요. 현재 ${effectiveChildName}의 호흡 상태를 실시간 모니터링 중입니다.
 평소와 다른 점이 있거나, 궁금한 점이 있으시면 언제든 입력해 주세요.`;
-  }, []);
+  },
+  [childName],
+);
+
+
 
   const isEmergency = patientData.spo2 < 90;
-  const prevEmergencyRef = useRef(isEmergency);
+const prevEmergencyRef = useRef(isEmergency);
+const prevNameRef = useRef<string | undefined>(childName);
 
-  /** spo2 상태에 따라 초기 메시지 리셋 */
-  useEffect(() => {
-    if (isFirstRender.current || prevEmergencyRef.current !== isEmergency) {
-      setMessages([
-        {
-          id: `init-${Date.now()}`,
-          role: "model",
-          text: getInitialMessage(patientData),
-          timestamp: new Date(),
-        },
-      ]);
-      prevEmergencyRef.current = isEmergency;
-      isFirstRender.current = false;
-    }
-  }, [isEmergency, getInitialMessage, patientData]);
+/** spo2 상태 / 이름 변경에 따라 초기 메시지 리셋 */
+useEffect(() => {
+  const nameChanged = prevNameRef.current !== childName;
+
+  if (
+    isFirstRender.current ||
+    prevEmergencyRef.current !== isEmergency ||
+    nameChanged
+  ) {
+    setMessages([
+      {
+        id: `init-${Date.now()}`,
+        role: "model",
+        text: getInitialMessage(patientData),
+        timestamp: new Date(),
+      },
+    ]);
+    prevEmergencyRef.current = isEmergency;
+    prevNameRef.current = childName;
+    isFirstRender.current = false;
+  }
+}, [isEmergency, getInitialMessage, patientData, childName]);
+
 
   /** 스크롤 맨 아래로 */
   const scrollToBottom = useCallback(() => {
@@ -267,7 +287,10 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       setIsLoading(true);
 
       try {
-        const aiResponseRaw = await generateMedicalAdvice(trimmed, patientData);
+        const aiResponseRaw = await generateMedicalAdvice(
+          trimmed,
+          patientData,
+        );
         const aiResponse =
           typeof aiResponseRaw === "string" ? aiResponseRaw.trim() : "";
 
@@ -352,7 +375,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
 
   return (
     <div className="h-full flex flex-col bg-slate-50">
-      {/* 상단 헤더 – 여백 확대 */}
+      {/* 상단 헤더 */}
       <header
         className="
           px-4 sm:px-5
@@ -367,7 +390,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           type="button"
           onClick={onToggleStatus}
           className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
-          aria-label="홈으로 이동"
+          aria-label="상태 토글"
         >
           <div className="flex items-center gap-2.5 transition-transform duration-300 group-hover:scale-[1.02] group-active:scale-95">
             <div className="bg-indigo-600 p-1.5 rounded-lg shadow-sm">
@@ -402,7 +425,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         </button>
       </header>
 
-      {/* 위험도 헤더 – 좌우 여백도 Layout과 맞춤 */}
+      {/* 위험도 헤더 */}
       <section className="px-4 sm:px-5 pt-2 pb-1.5 shrink-0">
         <button
           type="button"
@@ -448,7 +471,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         </button>
       </section>
 
-      {/* 채팅 영역 – px를 4/5로 맞춰서 전체 라인 통일 */}
+      {/* 채팅 영역 */}
       <div
         className="flex-1 min-h-0 overflow-y-auto px-4 sm:px-5 pt-2.5 pb-3.5 space-y-3"
         onClick={() => setShowMenu(false)}
@@ -597,7 +620,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
         <div ref={messagesEndRef} />
       </div>
 
-      {/* 하단 입력 영역 – 상단과 좌우 여백 맞춤 */}
+      {/* 하단 입력 영역 */}
       <div className="relative bg-white/90 backdrop-blur-xl border-t border-white/40 px-4 sm:px-5 pt-3.5 pb-4 shadow-2xl rounded-t-xl">
         {/* 플러스 버튼 메뉴 */}
         {showMenu && (
@@ -668,7 +691,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           </div>
         )}
 
-        {/* 추천 질문 – 입력창 바로 위 */}
+        {/* 추천 질문 */}
         {!isLoading &&
           messages.length > 0 &&
           messages[messages.length - 1].role === "model" &&
@@ -695,7 +718,7 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
           )}
 
         <div className="flex items-center space-x-3">
-          {/* 플러스 버튼 */}
+          {/* 플러스 버튼 – 메뉴 토글 + 아기 이름 랜덤 변경 */}
           <div className="relative group">
             <div
               className={`absolute -inset-0.5 rounded-xl blur transition-opacity duration-300 ${
@@ -705,8 +728,11 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
               }`}
             />
             <button
-              type="button"
-              onClick={() => setShowMenu((prev) => !prev)}
+  type="button"
+  onClick={() => {
+    setShowMenu((prev) => !prev);  // 메뉴 토글
+    onRandomizeChild();            // ★ 이름 랜덤 변경
+  }}
               className={`relative p-3 rounded-xl flex-shrink-0 transition-all duration-300 border-2 ${
                 showMenu
                   ? "bg-gradient-to-br from-sky-50 to-blue-50 border-sky-300 text-sky-700 rotate-45 shadow-md"
