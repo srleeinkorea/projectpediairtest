@@ -1,11 +1,6 @@
 // src/App.tsx
 import React, { useState, useEffect } from "react";
-import {
-  PatientData,
-  DANGER_DATA,
-  SAFE_DATA,
-  ScreenName,
-} from "./types";
+import { PatientData, DANGER_DATA, SAFE_DATA, ScreenName } from "./types";
 import Layout from "./components/Layout";
 import Modal from "./components/Modal";
 import EmrScreen from "./components/screens/EmrScreen";
@@ -49,28 +44,27 @@ const App: React.FC = () => {
   const [currentScreen, setCurrentScreen] = useState<ScreenName>("emr");
 
   // 현재 아기 이름
-  const [childName, setChildName] = useState<string>(() =>
-    pickRandomName(),
-  );
+  const [childName, setChildName] = useState<string>(() => pickRandomName());
 
-  // 플러스 버튼 눌렀을 때 이름만 랜덤 변경
   const handleRandomizeChild = () => {
     setChildName((prev) => pickRandomName(prev));
   };
 
-  // 메인 시뮬레이션 상태
-  const [simulationMode, setSimulationMode] =
-    useState<"danger" | "safe">("danger");
-  const [patientData, setPatientData] =
-    useState<PatientData>(DANGER_DATA);
+  // 🔹 시뮬레이션 모드: 3단계 (danger / warning / safe)
+  const [simulationMode, setSimulationMode] = useState<
+    "danger" | "warning" | "safe"
+  >("danger");
+
+  const [patientData, setPatientData] = useState<PatientData>(DANGER_DATA);
+
   const [modalOpen, setModalOpen] = useState(false);
 
-  // SPO2 시뮬레이션 로직
+  // 🔹 SPO2 시뮬레이션 로직 (모드별)
   useEffect(() => {
     let interval: ReturnType<typeof setInterval>;
 
     if (simulationMode === "danger") {
-      // Danger Mode: 88 ↔ 89 반복
+      // Danger Mode: 88 ↔ 89 반복 (응급 경고 느낌)
       setPatientData(DANGER_DATA);
       interval = setInterval(() => {
         setPatientData((prev) => ({
@@ -78,35 +72,46 @@ const App: React.FC = () => {
           spo2: prev.spo2 === 88 ? 89 : 88,
         }));
       }, 2000);
-    } else {
-      // Safe Mode: 98 → 93 → 96 등 시퀀스
-      const sequence = [98, 97, 96, 94, 93, 93, 93, 94, 95, 96];
+    } else if (simulationMode === "warning") {
+      // Warning Mode: 93~91 사이에서 왔다갔다 (주의 신호)
+      const warningSequence = [93, 92, 91, 92, 93, 93];
       let step = 0;
-      setPatientData({ ...SAFE_DATA, spo2: 98 });
+
+      setPatientData((prev) => ({
+        ...SAFE_DATA,
+        spo2: warningSequence[0],
+      }));
 
       interval = setInterval(() => {
-        if (step < sequence.length) {
-          setPatientData((prev) => ({
-            ...prev,
-            spo2: sequence[step],
-          }));
-          step++;
-        } else {
-          setPatientData((prev) => ({
-            ...prev,
-            spo2: prev.spo2 === 96 ? 97 : 96,
-          }));
-        }
+        step = (step + 1) % warningSequence.length;
+        setPatientData((prev) => ({
+          ...prev,
+          spo2: warningSequence[step],
+        }));
+      }, 1500);
+    } else {
+      // Safe Mode: 98~95 범위에서 안정적으로 오르내리는 패턴
+      const sequence = [98, 97, 96, 95, 96, 97, 98];
+      let step = 0;
+
+      setPatientData({ ...SAFE_DATA, spo2: sequence[0] });
+
+      interval = setInterval(() => {
+        step = (step + 1) % sequence.length;
+        setPatientData((prev) => ({
+          ...prev,
+          spo2: sequence[step],
+        }));
       }, 1200);
     }
 
     return () => clearInterval(interval);
   }, [simulationMode]);
 
-  // 위험/안전 토글 (EmrScreen에서 호출)
+  //    화면 이동 없음 (위험도 배지만 변경)
   const togglePatientStatus = () => {
     setSimulationMode((prev) =>
-      prev === "danger" ? "safe" : "danger",
+      prev === "danger" ? "warning" : prev === "warning" ? "safe" : "danger"
     );
   };
 
@@ -161,10 +166,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <Layout
-      activeScreen={currentScreen}
-      onNavigate={navigateTo}
-    >
+    <Layout activeScreen={currentScreen} onNavigate={navigateTo}>
       {renderScreen()}
 
       <Modal

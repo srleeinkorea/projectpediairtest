@@ -6,13 +6,13 @@ import React, {
   useCallback,
   useMemo,
 } from "react";
-import { PatientData, ChatMessage } from "../../types";
+import { PatientData, ChatMessage, ScreenName } from "../../types"; // 🔹 ScreenName 추가
 import { generateMedicalAdvice } from "../../services/geminiService";
 
 interface EmrScreenProps {
   patientData: PatientData;
   onToggleStatus: () => void;
-  onNavigate: (screen: string) => void;
+  onNavigate: (screen: ScreenName) => void; // 🔹 string → ScreenName으로 변경
   childName: string;
   onRandomizeChild: () => void;
 }
@@ -361,10 +361,14 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
   const prevEmergencyRef = useRef(isEmergency);
   const prevNameRef = useRef<string | undefined>(childName);
 
-  const getRiskLevel = useCallback((spo2: number) => {
-    if (spo2 < 90) return "danger" as const;
-    return "safe" as const;
-  }, []);
+  const getRiskLevel = useCallback(
+    (spo2: number): "safe" | "warning" | "danger" => {
+      if (spo2 < 90) return "danger"; // 위험신호
+      if (spo2 < 94) return "warning"; // 주의신호 (90~93%)
+      return "safe"; // 안정신호 (94 이상)
+    },
+    []
+  );
 
   const riskLevel = useMemo(
     () => getRiskLevel(patientData.spo2),
@@ -568,17 +572,17 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       {/* 상단 로고 */}
       <header
         className="
-          px-4 sm:px-5
-          py-2.5 sm:py-3
-          flex items-center justify-center
-          bg-white/90 backdrop-blur-xl
-          border-b border-white/40
-          z-30 shrink-0 shadow-sm
-        "
+    px-4 sm:px-5
+    py-2.5 sm:py-3
+    flex items-center justify-center
+    bg-white/90 backdrop-blur-xl
+    border-b border-white/40
+    z-30 shrink-0 shadow-sm
+  "
       >
         <button
           type="button"
-          onClick={onToggleStatus}
+          onClick={onToggleStatus} // 🔹 여기: 상태 토글만
           className="group hover:opacity-95 active:scale-[0.99] transition-all duration-200"
           aria-label="홈으로 이동"
         >
@@ -616,20 +620,28 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       </header>
 
       {/* 위험도 배지 */}
+      {/* 위험도 배지 */}
       <section className="px-4 sm:px-5 pt-2 pb-1.5 shrink-0">
         <button
           type="button"
-          onClick={() => onNavigate("triage")}
+          onClick={() => {
+            // 🔹 이제는 상태는 건드리지 않고,
+            //    "주의" 또는 "위험"일 때만 Triage 화면으로 이동
+            if (riskLevel === "warning" || riskLevel === "danger") {
+              onNavigate("triage");
+            }
+            // riskLevel === "safe"일 때는 아무 일도 안 함
+          }}
           className="
-            w-full flex items-center
-            rounded-2xl
-            bg-white/95
-            border border-slate-100
-            shadow-sm
-            px-2.5 py-1.75
-            active:scale-[0.99]
-            transition-all duration-150
-          "
+      w-full flex items-center
+      rounded-2xl
+      bg-white/95
+      border border-slate-100
+      shadow-sm
+      px-2.5 py-1.75
+      active:scale-[0.99]
+      transition-all duration-150
+    "
           aria-label="상세 위험도 보기"
         >
           <div className="flex items-center gap-1.5 bg-slate-50/90 backdrop-blur-sm px-1.5 py-0.5 rounded-full border border-slate-200/60">
@@ -642,50 +654,19 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
 
           <div className="flex items-center gap-2">
             {riskLevel === "safe" && (
-              <span
-                className="
-                  inline-flex items-center px-3 py-1
-                  rounded-full text-[10px] font-extrabold
-                  bg-emerald-50 text-emerald-700
-                  border border-emerald-200
-                  tracking-tight
-                "
-              >
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200 tracking-tight">
                 건강 위험등 안정신호
               </span>
             )}
             {riskLevel === "warning" && (
-              <span
-                className="
-                  inline-flex items-center px-3 py-1
-                  rounded-full text-[10px] font-extrabold
-                  bg-amber-50 text-amber-700
-                  border border-amber-200
-                  tracking-tight
-                "
-              >
-                주의 상태
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold bg-amber-50 text-amber-700 border border-amber-200 tracking-tight">
+                건강 위험등 주의신호
               </span>
             )}
             {riskLevel === "danger" && (
               <span className="relative inline-flex items-center">
-                <span
-                  className="
-                    absolute -inset-1 rounded-full
-                    bg-gradient-to-r from-rose-400/60 to-red-500/60
-                    blur-md opacity-80
-                    animate-pulse
-                  "
-                />
-                <span
-                  className="
-                    relative inline-flex items-center px-3 py-1
-                    rounded-full text-[10px] font-extrabold
-                    bg-gradient-to-r from-rose-500 to-red-600
-                    text-white shadow-md border border-rose-200/80
-                    tracking-tight
-                  "
-                >
+                <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-rose-400/60 to-red-500/60 blur-md opacity-80 animate-pulse" />
+                <span className="relative inline-flex items-center px-3 py-1 rounded-full text-[10px] font-extrabold bg-gradient-to-r from-rose-500 to-red-600 text-white shadow-md border border-rose-200/80 tracking-tight">
                   건강 위험등 위험신호
                 </span>
               </span>
