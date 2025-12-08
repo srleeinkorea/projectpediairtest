@@ -79,7 +79,7 @@ const TrafficLightFace: React.FC<{
 };
 
 // ====================================================================
-// 2. **텍스트** 강조용 유틸
+// 2. 텍스트 볼드 처리 유틸
 // ====================================================================
 const renderFormattedText = (text: string) => {
   const parts = text.split(/\*\*(.*?)\*\*/g);
@@ -109,12 +109,52 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const [welcomeInput, setWelcomeInput] = useState("");
   const maxLength = 300;
 
+  // 질문 5개
   const initialSuggestions = [
     "오늘 가래가 많아져서 석션을 더 자주 하는데 괜찮을까요?",
     "잘 때 인공호흡기 경고음이 자주 울리는데 어떻게 해야 하나요?",
     "요즘 SpO₂가 92~94% 정도로 나와서 걱정돼요.",
     "평소보다 호흡수가 빨라졌는데 응급실에 가야 할까요?",
+    "밤에 깨서 숨이 가빠 보일 때 어떻게 해야 할까요?",
   ];
+
+  // 🔹 자동 위로 스크롤용 상태
+  const [scrollIndex, setScrollIndex] = useState(0);
+  const [instantJump, setInstantJump] = useState(false);
+
+  // 한 아이템의 높이/간격 (px) - 필요하면 숫자만 살짝 조정하면 됨
+  const ITEM_HEIGHT = 52;
+  const ITEM_GAP = 10;
+  const STEP = ITEM_HEIGHT + ITEM_GAP;
+  const VISIBLE_COUNT = 3;
+
+  // 🔹 1초에 한 번씩 한 칸 위로
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setScrollIndex((prev) => prev + 1);
+    }, 2000); // 1초마다
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // 🔹 끝까지 올라가면 티 안 나게 맨 앞으로 점프
+  useEffect(() => {
+    const len = initialSuggestions.length;
+
+    if (scrollIndex === len) {
+      // transition(0.5s) 끝난 뒤에 점프
+      const t = setTimeout(() => {
+        setInstantJump(true); // 잠시 애니메이션 끄고
+        setScrollIndex(0); // 맨 앞으로 점프
+        // 다음 프레임에서 다시 transition 켜기
+        requestAnimationFrame(() => {
+          setInstantJump(false);
+        });
+      }, 520);
+
+      return () => clearTimeout(t);
+    }
+  }, [scrollIndex, initialSuggestions.length]);
 
   const handleWelcomeSend = () => {
     const trimmed = welcomeInput.trim();
@@ -123,29 +163,35 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
     setWelcomeInput("");
   };
 
+  // 🔹 무한 루프처럼 보이게 리스트를 두 번 이어붙임
+  const rollingList = [...initialSuggestions, ...initialSuggestions];
+
   return (
     <div
       className="
-        flex flex-col items-center justify-start
-        pt-10 pb-10
-        min-h-[calc(100vh-230px)]
+        flex flex-col
+        justify-between
+        items-center
+        h-full
         bg-gradient-to-b from-[#F5F7FF] via-[#F0F4FF] to-[#E6EDFF]
+        pt-8 pb-6
       "
     >
-      <div className="w-full max-w-sm px-4">
+      {/* 상단 영역: 타이틀 + 인풋 */}
+      <div className="w-full max-w-sm px-4 flex flex-col">
         {/* 타이틀 */}
-        <h2 className="text-[22px] sm:text-[24px] font-extrabold text-slate-900 tracking-tight leading-snug">
+        <h2 className="text-[22px] sm:text-[24px] font-extrabold text-slate-900 tracking-tight leading-snug text-center">
           브이닥 PEDI-AIR에게
           <br />
           먼저 물어보세요
         </h2>
 
         {/* 서브 타이틀 */}
-        <p className="mt-4 text-[13px] font-semibold text-[#2E4475]">
+        <p className="mt-4 text-[13px] font-semibold text-[#2E4475] text-center">
           어떤 점이 가장 걱정되세요?
         </p>
 
-        {/* 인풋 박스 하나 + 외곽 실선 반짝 */}
+        {/* 인풋 박스 */}
         <div className="mt-4 relative">
           <div
             className="
@@ -190,7 +236,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 bg-transparent
                 border-none
                 outline-none
-                text-[15px] font-medium text-slate-900
+                text-[12px] font-medium text-slate-900
                 placeholder:text-slate-400 placeholder:font-normal
               "
               aria-label="아이 상태 입력"
@@ -223,13 +269,14 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </div>
         </div>
 
+        {/* 글자 수 카운터 */}
         <div className="mt-1.5 text-right text-[11px] text-slate-400">
           {welcomeInput.length}/{maxLength}
         </div>
       </div>
 
-      {/* 추천 질문 영역 */}
-      <div className="w-full max-w-sm mt-10 px-4">
+      {/* 하단 영역: 또래 보호자 질문 – 맨 아래 + 자동 위로 스크롤 */}
+      <div className="w-full max-w-sm px-4 pb-1">
         <div className="flex items-center justify-center gap-2 mb-4">
           <span className="text-[#4F7BFF] text-[18px]">💬</span>
           <span className="text-[13px] font-bold text-[#344674]">
@@ -239,26 +286,48 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
           </span>
         </div>
 
-        <div className="space-y-2.5">
-          {initialSuggestions.map((q) => (
-            <button
-              key={q}
-              type="button"
-              onClick={() => onQuestionSelect(q)}
-              className="
-                w-full text-center px-4 py-3
-                bg-white/96 backdrop-blur-sm
-                border border-slate-100
-                rounded-[999px]
-                text-[13px] font-semibold text-slate-800
-                shadow-[0_8px_20px_rgba(120,150,220,0.18)]
-                transition-all duration-200
-                hover:bg-slate-50 active:scale-[0.98]
-              "
-            >
-              {q}
-            </button>
-          ))}
+        {/* 🔹 세 개 정도만 완전히 보이고, 밑에는 살짝 보일 듯 말 듯 + 1초마다 한 칸씩 위로 */}
+        <div
+          className="overflow-hidden"
+          style={{
+            // 3개 + 약간 여유를 줘서 아래가 살짝 보이는 느낌
+            height: VISIBLE_COUNT * STEP + 10,
+          }}
+        >
+          <div
+            className={`
+              ${instantJump ? "" : "transition-transform duration-500 ease-out"}
+            `}
+            style={{
+              transform: `translateY(-${scrollIndex * STEP}px)`,
+            }}
+          >
+            {rollingList.map((q, idx) => (
+              <button
+                key={`${q}-${idx}`}
+                type="button"
+                onClick={() => onQuestionSelect(q)}
+                style={{
+                  height: ITEM_HEIGHT,
+                  marginBottom: idx === rollingList.length - 1 ? 0 : ITEM_GAP,
+                }}
+                className="
+                  w-full text-center
+                  px-4
+                  bg-white/96 backdrop-blur-sm
+                  border border-slate-100
+                  rounded-[999px]
+                  text-[13px] font-semibold text-slate-800
+                  shadow-[0_8px_20px_rgba(120,150,220,0.18)]
+                  transition-all duration-200
+                  hover:bg-slate-50 active:scale-[0.98]
+                  flex items-center justify-center
+                "
+              >
+                {q}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     </div>
