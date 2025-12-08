@@ -1,0 +1,5 @@
+{
+  "name": "V.Doc PEDI-AIR",
+  "description": "A pediatric home care monitoring application for high-risk patients (BPD), featuring real-time vital sign tracking, ventilator risk analysis, and AI-powered EMR consultation.",
+  "requestFramePermissions": []
+}
