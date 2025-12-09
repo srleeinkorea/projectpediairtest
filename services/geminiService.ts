@@ -48,12 +48,15 @@ export const generateMedicalAdvice = async (
   patientData: PatientData
 ): Promise<string> => {
   try {
-    if (!process.env.API_KEY) {
-      console.warn("API_KEY is missing. Switching to Demo Mode.");
+    // ✅ Vite 스타일로 환경변수 읽기
+    const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
+
+    if (!apiKey) {
+      console.warn("VITE_GEMINI_API_KEY is missing. Switching to Demo Mode.");
       throw new Error("Missing API Key");
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const ai = new GoogleGenAI({ apiKey });
 
     const context = `
 [Patient Profile]
@@ -80,11 +83,13 @@ export const generateMedicalAdvice = async (
       },
     });
 
-    // SDK 버전에 따라 response 구조가 다를 수 있어서
-    // 필요하면 여기 부분을 `response.response.text()`처럼 바꿔야 할 수도 있습니다.
-    // (지금 형태가 동작하고 있다면 그대로 두셔도 됩니다.)
-    // @ts-ignore
-    return response.text || "죄송합니다. AI 응답을 불러올 수 없습니다.";
+    const anyRes = response as any;
+    const text =
+      anyRes?.response?.text?.() ??
+      anyRes?.text ??
+      "죄송합니다. AI 응답을 불러올 수 없습니다.";
+
+    return text;
   } catch (error) {
     console.error("Gemini API Error or Demo Fallback:", error);
 
