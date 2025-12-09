@@ -14,6 +14,9 @@ const SYSTEM_INSTRUCTION = `
 - **현재 수치 + 최근 추세(잠깐 저하 후 회복인지, 점점 나빠지는지)**를 함께 고려합니다.
 - **호흡곤란 징후(청색증, 흉벽 함몰, 콧볼 벌렁거림, 의식 저하)**와
   인공호흡기 **압력·누출·알람 반복** 여부를 같이 생각합니다.
+- 인공호흡기 압력은 **구체적인 숫자 수치(예: 24 cmH₂O)를 그대로 나열하지 말고**,
+  "**설정값보다 조금 높은 상태예요**", "**설정 범위 안에서 유지되고 있어요**"처럼
+  보호자가 이해하기 쉬운 말로 설명합니다.
 - 진단·치료를 결정하지 말고, **가능성**과 **주의 필요 여부**만 설명합니다.
 
 [톤]
@@ -106,6 +109,26 @@ export const generateMedicalAdvice = async (
     // =========================================================
     // 2) 일반 케이스 → Gemini 호출
     // =========================================================
+
+    // 인공호흡기 압력 상태를 '친화적인 문장'으로 변환
+    let pressureState =
+      "현재 인공호흡기 압력은 설정 범위 안에서 유지되고 있는 편이에요.";
+    if (
+      typeof patientData.p_peak_measured === "number" &&
+      typeof patientData.p_peak_threshold === "number"
+    ) {
+      if (patientData.p_peak_measured > patientData.p_peak_threshold + 2) {
+        pressureState =
+          "현재 인공호흡기 압력이 **설정값보다 다소 높은 상태**로 감지되고 있어요.";
+      } else if (patientData.p_peak_measured > patientData.p_peak_threshold) {
+        pressureState =
+          "인공호흡기 압력이 **설정값보다 약간 높은 편**으로 보이지만, 다른 수치와 함께 확인이 필요해요.";
+      } else {
+        pressureState =
+          "현재 인공호흡기 압력은 **설정 범위 안에서 비교적 안정적으로 유지**되고 있어요.";
+      }
+    }
+
     const apiKey = import.meta.env.VITE_GEMINI_API_KEY as string | undefined;
 
     if (!apiKey) {
@@ -124,7 +147,7 @@ export const generateMedicalAdvice = async (
 [Real-time Vitals]
 - SpO₂: ${patientData.spo2}% (Target: >95%, Danger: <90%)
 - Respiratory Rate (RR): ${patientData.rr} bpm
-- Ventilator: P-Peak ${patientData.p_peak_measured} (Limit: ${patientData.p_peak_threshold})
+- 인공호흡기 상태: ${pressureState}
 
 [이름 사용 규칙]
 - 답변에서 아이를 부를 때는 **반드시 "${patientData.name}" 또는 "${patientData.name} 보호자님"**이라고만 부르세요.
