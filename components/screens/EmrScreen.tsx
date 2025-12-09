@@ -178,7 +178,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
       "
     >
       {/* 상단 영역: 타이틀 + 인풋 */}
-      <div className="w-full max-w-sm px-4 flex flex-col">
+      <div className="w-full max-w-md px-5 flex flex-col">
         {/* 타이틀 */}
         <h2 className="text-[22px] sm:text-[24px] font-extrabold text-slate-900 tracking-tight leading-snug text-center">
           브이닥 PEDI-AIR에게
@@ -192,80 +192,96 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
         </p>
 
         {/* 인풋 박스 */}
-        <div className="mt-4 relative">
+        <div className="mt-5 relative flex justify-center">
+          {/* 바깥 은은한 테두리/글로우 */}
           <div
             className="
-              pointer-events-none
-              absolute -inset-[3px]
-              rounded-[22px]
-              border border-sky-300
-              shadow-[0_0_0_1px_rgba(96,142,255,0.45)]
-              opacity-80
-              animate-pulse
-            "
+      pointer-events-none
+      absolute
+      -inset-[3px]
+      rounded-[20px]
+      border border-sky-300/75
+      shadow-[0_0_0_1px_rgba(96,142,255,0.30)]
+      opacity-90
+      animate-pulse
+    "
           />
 
+          {/* 실제 입력 박스 – 폭을 약간 줄여서 너무 커 보이지 않게 */}
           <div
             className="
-              relative
-              bg-white
-              rounded-[20px]
-              px-4 py-3
-              flex items-center gap-3
-              shadow-[0_10px_26px_rgba(120,150,220,0.18)]
-            "
+      relative
+      w-full max-w-[21rem]
+      bg-white
+      rounded-[18px]
+      px-4 py-3
+      flex gap-3
+      shadow-[0_10px_24px_rgba(120,150,220,0.18)]
+    "
           >
-            <span className="text-[18px] text-sky-400">📝</span>
+            {/* 아이콘 영역 */}
+            <div className="pt-0.5">
+              <span className="text-[18px] text-sky-400">📝</span>
+            </div>
 
-            <input
-              type="text"
-              value={welcomeInput}
-              onChange={(e) =>
-                setWelcomeInput(e.target.value.slice(0, maxLength))
-              }
-              onKeyDown={(e) => {
-                if (e.key === "Enter" && !e.nativeEvent.isComposing) {
-                  e.preventDefault();
-                  handleWelcomeSend();
+            {/* textarea + 하단 바 */}
+            <div className="flex-1 flex flex-col">
+              <textarea
+                value={welcomeInput}
+                onChange={(e) =>
+                  setWelcomeInput(e.target.value.slice(0, maxLength))
                 }
-              }}
-              placeholder="지금 가장 궁금한 상황을 적어주세요."
-              maxLength={maxLength}
-              className="
-                flex-1
-                bg-transparent
-                border-none
-                outline-none
-                text-[12px] font-medium text-slate-900
-                placeholder:text-slate-400 placeholder:font-normal
-              "
-              aria-label="아이 상태 입력"
-            />
+                placeholder="지금 가장 궁금한 상황을 편하게 적어주세요."
+                maxLength={maxLength}
+                rows={3}
+                className="
+          w-full
+          bg-transparent
+          border-none
+          outline-none
+          resize-none
+          text-[12.5px] font-medium text-slate-900
+          placeholder:text-slate-400 placeholder:font-normal
+          leading-relaxed
+        "
+                aria-label="아이 상태 입력"
+              />
 
-            <button
-              type="button"
-              onClick={handleWelcomeSend}
-              disabled={!welcomeInput.trim()}
-              className={`
-                flex items-center justify-center rounded-full p-2.5
-                transition-all duration-200
-                ${
-                  welcomeInput.trim()
-                    ? "bg-gradient-to-r from-[#4F86FF] to-[#3167FF] text-white shadow-md hover:shadow-lg active:scale-95"
-                    : "bg-slate-100 text-slate-300 cursor-not-allowed"
-                }
-              `}
-              aria-label="메시지 전송"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-4 w-4"
-                viewBox="0 0 20 20"
-                fill="currentColor"
-              >
-                <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
-              </svg>
-            </button>
+              {/* 아래 여백 + 카운터/버튼 정렬 */}
+              <div className="mt-2 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  {welcomeInput.length}/{maxLength}
+                </span>
+
+                <button
+                  type="button"
+                  onClick={handleWelcomeSend}
+                  disabled={!welcomeInput.trim()}
+                  className={`
+            inline-flex items-center justify-center gap-1.5
+            rounded-full px-3 py-1.5
+            text-[11px] font-semibold
+            transition-all duration-200
+            ${
+              welcomeInput.trim()
+                ? "bg-gradient-to-r from-[#4F86FF] to-[#3167FF] text-white shadow-md hover:shadow-lg active:scale-95"
+                : "bg-slate-100 text-slate-300 cursor-not-allowed"
+            }
+          `}
+                  aria-label="메시지 전송"
+                >
+                  <span>보내기</span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-3.5 w-3.5"
+                    viewBox="0 0 20 20"
+                    fill="currentColor"
+                  >
+                    <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
         </div>
 
