@@ -636,17 +636,12 @@ const EmrScreen: React.FC<EmrScreenProps> = ({
       </header>
 
       {/* 위험도 배지 */}
-      {/* 위험도 배지 */}
       <section className="px-4 sm:px-5 pt-2 pb-1.5 shrink-0">
         <button
           type="button"
           onClick={() => {
-            // 🔹 이제는 상태는 건드리지 않고,
-            //    "주의" 또는 "위험"일 때만 Triage 화면으로 이동
-            if (riskLevel === "warning" || riskLevel === "danger") {
-              onNavigate("triage");
-            }
-            // riskLevel === "safe"일 때는 아무 일도 안 함
+            // ✅ 안정/주의/위험 상관 없이 항상 Triage 화면으로 이동
+            onNavigate("triage");
           }}
           className="
       w-full flex items-center

@@ -26,7 +26,7 @@ const getRiskLevel = (data: PatientData): RiskLevel => {
 };
 
 const STATUS_CONFIG: Record<
-  1 | 3,
+  RiskLevel,
   {
     title: string;
     desc: string;
@@ -38,6 +38,13 @@ const STATUS_CONFIG: Record<
     title: "안정적인 경과를 보이고 있어요",
     desc: "현재 측정된 수치는 전반적으로 안전 범위 안에 있어요. 아이의 숨소리와 표정도 함께 살펴봐 주세요.",
     action: "지금처럼 잘 관리해주세요.",
+    color: "mint",
+  },
+  2: {
+    title: "진료실(외래)에서 한 번 더 확인이 필요해요",
+    desc: "최근 모니터링 결과상 주의가 필요한 변화가 관찰되고 있어요. 지금 바로 응급실로 갈 정도는 아니지만, 의료진이 직접 상태를 확인해 주면 안심이 될 수 있어요.",
+    action:
+      "가급적 빠른 시간 내에 외래 진료를 보시길 권해요. 혹시, 숨이 더 가빠지거나 입술·손끝이 파래지면, 지체하지 말고 119 혹은 응급실을 이용해 주세요.",
     color: "mint",
   },
   3: {
@@ -66,9 +73,7 @@ const SectionHeader: React.FC<SectionHeaderProps> = ({ label, accent }) => {
   return (
     <div className="flex items-center gap-2 mb-1">
       <div className={`w-[3px] h-4 rounded-full ${barColor}`} />
-      <span className="text-[12px] font-semibold text-slate-800">
-        {label}
-      </span>
+      <span className="text-[12px] font-semibold text-slate-800">{label}</span>
     </div>
   );
 };
@@ -79,7 +84,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
   onNavigate, // 시그니처만 유지
 }) => {
   const rawLevel = getRiskLevel(patientData);
-  const cardLevel: 1 | 3 = rawLevel === 3 ? 3 : 1; // 카드 색/메시지는 안정(1) vs 응급(3) 두 단계만
+  const cardLevel: RiskLevel = rawLevel; // 이제 1/2/3 모두 카드에 반영
 
   const status = STATUS_CONFIG[cardLevel];
   const styles = getStylesForColor(status.color);
@@ -170,11 +175,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               {/* 얼굴 게이지 */}
               <div className="flex flex-col items-center w-full max-w-[280px] gap-1.5">
                 <div className="flex items-center w-full justify-between">
-                  <GaugeFace
-                    active={cardLevel === 1}
-                    icon="😊"
-                    variant="mint"
-                  />
+                  <GaugeFace active={rawLevel === 1} icon="😊" variant="mint" />
                   <div className="flex-1 h-px mx-2 bg-slate-100" />
                   <GaugeFace
                     active={rawLevel === 2}
@@ -182,11 +183,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     variant="neutral"
                   />
                   <div className="flex-1 h-px mx-2 bg-slate-100" />
-                  <GaugeFace
-                    active={cardLevel === 3}
-                    icon="😫"
-                    variant="rose"
-                  />
+                  <GaugeFace active={rawLevel === 3} icon="😫" variant="rose" />
                 </div>
                 <div className="flex w-full justify-between text-[10px] text-slate-500">
                   <span className="w-1/3 text-left pl-1">안정</span>
@@ -204,8 +201,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     patientData.spo2 < 90
                       ? "bad"
                       : patientData.spo2 < 94
-                      ? "warn"
-                      : "good"
+                        ? "warn"
+                        : "good"
                   }
                 />
                 <VitalMini
@@ -215,8 +212,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
                     patientData.rr > 40
                       ? "bad"
                       : patientData.rr > 30
-                      ? "warn"
-                      : "good"
+                        ? "warn"
+                        : "good"
                   }
                 />
                 <VitalMini
@@ -264,7 +261,7 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               `}
             >
               <div className="w-9 h-9 rounded-2xl bg-gradient-to-br from-white to-slate-50 shadow-sm flex items-center justify-center text-xl">
-                {cardLevel === 1 ? "🏡" : "🚑"}
+                {cardLevel === 1 ? "🏡" : cardLevel === 2 ? "🏥" : "🚑"}
               </div>
               <p className="text-[14px] font-semibold text-slate-900 leading-snug">
                 {status.action}
@@ -425,8 +422,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               </div>
 
               <p className="mt-1 text-[10px] text-slate-400 leading-snug">
-                병상 정보는 중앙응급의료센터 기준이며 수 분 단위로
-                변경될 수 있어요. 도착 전 병원에 전화로 한 번 더 확인해 주세요.
+                병상 정보는 중앙응급의료센터 기준이며 수 분 단위로 변경될 수
+                있어요. 도착 전 병원에 전화로 한 번 더 확인해 주세요.
               </p>
             </div>
           </section>
@@ -443,8 +440,8 @@ const TriageScreen: React.FC<TriageScreenProps> = ({
               </p>
               <p className="mt-1 text-[12px] text-slate-500 leading-snug">
                 통화 후에도 아이 상태가 급격히 나빠지면{" "}
-                <span className="font-semibold">119 신고</span>도 함께
-                고려해 주세요.
+                <span className="font-semibold">119 신고</span>도 함께 고려해
+                주세요.
               </p>
             </div>
             <div className="flex gap-2 mt-3">
@@ -489,8 +486,9 @@ const GaugeFace: React.FC<GaugeFaceProps> = ({ active, icon, variant }) => {
       glow: "from-rose-400/40 to-pink-300/40",
     },
     neutral: {
-      gradient: "from-sky-400 to-cyan-500",
-      glow: "from-sky-300/40 to-cyan-300/40",
+      // 🔧 주의 = 노란색 계열
+      gradient: "from-amber-300 to-yellow-400",
+      glow: "from-amber-200/60 to-yellow-200/60",
     },
   }[variant];
 
@@ -554,12 +552,8 @@ const VitalMini: React.FC<VitalMiniProps> = ({ label, value, status }) => {
       `}
     >
       <span className="text-[10px] text-slate-500">{label}</span>
-      <span className={`text-[12px] font-semibold ${style.text}`}>
-        {value}
-      </span>
-      <span className="mt-0.5 text-[9px] text-slate-500">
-        {style.helper}
-      </span>
+      <span className={`text-[12px] font-semibold ${style.text}`}>{value}</span>
+      <span className="mt-0.5 text-[9px] text-slate-500">{style.helper}</span>
     </div>
   );
 };
