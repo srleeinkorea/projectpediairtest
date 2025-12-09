@@ -75,9 +75,9 @@ export const generateMedicalAdvice = async (
         ].join("\n");
       }
 
-      // (2) 두 번째 질문: "흡인을 했지만 산소포화도가 88%" 등
+      // (2) 두 번째 질문: "흡인 후에도 산소포화도가 88%" 등
       if (
-        compact.includes("흡인을했지만") &&
+        compact.includes("흡인 후에도") &&
         (compact.includes("산소포화도가88") ||
           compact.includes("spo2가88") ||
           patientData.spo2 <= 88)
