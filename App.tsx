@@ -8,16 +8,7 @@ import TriageScreen from "./components/screens/TriageScreen";
 import VentilatorScreen from "./components/screens/VentilatorScreen";
 
 // 아기 이름 후보
-const CHILD_NAME_CANDIDATES = [
-  "수빈이",
-  "민성이",
-  "지우",
-  "하린이",
-  "도윤이",
-  "유진이",
-  "서준이",
-  "예린이",
-];
+const CHILD_NAME_CANDIDATES = ["수빈이", "민성이", "예지"];
 
 // 현재 이름(exclude)과 다른 랜덤 이름 뽑기
 const pickRandomName = (exclude?: string) => {
