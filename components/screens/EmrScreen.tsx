@@ -126,13 +126,13 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
   const ITEM_HEIGHT = 52;
   const ITEM_GAP = 10;
   const STEP = ITEM_HEIGHT + ITEM_GAP;
-  const VISIBLE_COUNT = 3;
+  const VISIBLE_COUNT = 2;
 
   // 🔹 1초에 한 번씩 한 칸 위로
   useEffect(() => {
     const timer = setInterval(() => {
       setScrollIndex((prev) => prev + 1);
-    }, 2000); // 1초마다
+    }, 1500); // 1초마다
 
     return () => clearInterval(timer);
   }, []);
@@ -233,7 +233,7 @@ const WelcomeScreen: React.FC<WelcomeScreenProps> = ({
                 }
                 placeholder="지금 가장 궁금한 상황을 편하게 적어주세요."
                 maxLength={maxLength}
-                rows={3}
+                rows={2}
                 className="
           w-full
           bg-transparent

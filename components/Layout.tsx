@@ -19,14 +19,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div
       className="
-          w-full
-          min-h-[100dvh]
-          flex
-          justify-center
-          items-center          /* 항상 가운데 정렬 */
-          bg-gradient-to-b from-slate-100 via-slate-100 to-slate-200
-          sm:px-4
-        "
+  w-full min-h-[100dvh] flex justify-center items-center sm:px-4
+  bg-[radial-gradient(60%_60%_at_50%_35%,rgba(255,231,198,0.55)_0%,rgba(226,232,240,0.0)_55%),linear-gradient(to_bottom,#F7FAFF,#EEF2FF,#F1F5F9)]
+"
     >
       {/* 중앙 정렬 래퍼 */}
       <div
@@ -66,12 +61,12 @@ max-w-[360px] sm:max-w-[330px] lg:max-w-[320px]
                 relative
                 w-full
                 h-full
-                bg-slate-900/95
+bg-[#0B1220]/95   // 딥 네이비
                 rounded-[32px]
                 p-[6px]
                 sm:p-[8px]
-                shadow-[0_26px_80px_rgba(15,23,42,0.55)]
-                border border-slate-800/70
+shadow-[0_30px_90px_rgba(2,6,23,0.45)]
+border-white/10   // 테두리도 더 소프트
               "
           >
             {/* 실제 화면 영역 */}
