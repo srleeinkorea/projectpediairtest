@@ -46,7 +46,7 @@ const App: React.FC = () => {
     "danger" | "warning" | "safe"
   >("safe");
 
-  const [patientData, setPatientData] = useState<PatientData>(DANGER_DATA);
+  const [patientData, setPatientData] = useState<PatientData>(SAFE_DATA);
 
   const [modalOpen, setModalOpen] = useState(false);
 
