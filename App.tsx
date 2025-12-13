@@ -44,7 +44,7 @@ const App: React.FC = () => {
   // 🔹 시뮬레이션 모드: 3단계 (danger / warning / safe)
   const [simulationMode, setSimulationMode] = useState<
     "danger" | "warning" | "safe"
-  >("danger");
+  >("safe");
 
   const [patientData, setPatientData] = useState<PatientData>(DANGER_DATA);
 
