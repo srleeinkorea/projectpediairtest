@@ -1,121 +1,103 @@
-// src/App.tsx
 import React, { useState, useEffect } from "react";
-import { PatientData, DANGER_DATA, SAFE_DATA, ScreenName } from "./types";
+import {
+  PatientData,
+  DANGER_DATA,
+  SAFE_DATA,
+  ScreenName,
+  ProData,
+} from "./types";
+
 import Layout from "./components/Layout";
-import Modal from "./components/Modal";
 import EmrScreen from "./components/screens/EmrScreen";
 import TriageScreen from "./components/screens/TriageScreen";
 import VentilatorScreen from "./components/screens/VentilatorScreen";
+import ReportScreen from "./components/screens/ReportScreen";
+import ProModal from "./components/ProModal";
 
-// 아기 이름 후보
-const CHILD_NAME_CANDIDATES = ["수빈이", "민성이", "예지"];
+/* ------------------------------
+   랜덤 환아 이름 생성
+-------------------------------- */
+const CHILD_NAMES = [
+  "민준",
+  "서연",
+  "도윤",
+  "지우",
+  "하준",
+  "하린",
+  "은우",
+  "지아",
+  "시우",
+  "유진",
+];
 
-// 현재 이름(exclude)과 다른 랜덤 이름 뽑기
-const pickRandomName = (exclude?: string) => {
-  if (CHILD_NAME_CANDIDATES.length === 0) return "우리 아이";
-
-  let name =
-    CHILD_NAME_CANDIDATES[
-      Math.floor(Math.random() * CHILD_NAME_CANDIDATES.length)
-    ];
-
-  if (exclude && CHILD_NAME_CANDIDATES.length > 1) {
-    while (name === exclude) {
-      name =
-        CHILD_NAME_CANDIDATES[
-          Math.floor(Math.random() * CHILD_NAME_CANDIDATES.length)
-        ];
-    }
-  }
-  return name;
+const pickRandomName = () => {
+  const idx = Math.floor(Math.random() * CHILD_NAMES.length);
+  return CHILD_NAMES[idx];
 };
 
+/* ------------------------------
+   메인 App
+-------------------------------- */
 const App: React.FC = () => {
-  // 네비게이션 상태
+  /* 화면 상태 */
   const [currentScreen, setCurrentScreen] = useState<ScreenName>("emr");
 
-  // 현재 아기 이름
-  const [childName, setChildName] = useState<string>(() => pickRandomName());
+  /* 환아 이름 */
+  const [childName, setChildName] = useState<string>(pickRandomName());
 
-  const handleRandomizeChild = () => {
-    setChildName((prev) => pickRandomName(prev));
-  };
+  /* 시뮬레이션 상태 */
+  const [simulationMode, setSimulationMode] = useState<"danger" | "safe">(
+    "safe",
+  );
 
-  // 🔹 시뮬레이션 모드: 3단계 (danger / warning / safe)
-  const [simulationMode, setSimulationMode] = useState<
-    "danger" | "warning" | "safe"
-  >("safe");
-
+  /* 환자 데이터 */
   const [patientData, setPatientData] = useState<PatientData>(SAFE_DATA);
 
-  const [modalOpen, setModalOpen] = useState(false);
+  /* PRO 모달 상태 */
+  const [modalOpen, setModalOpen] = useState<boolean>(false);
 
-  // 🔹 SPO2 시뮬레이션 로직 (모드별)
+  /* PRO 입력 결과 */
+  const [proData, setProData] = useState<ProData | null>(null);
+
+  /* ------------------------------
+     시뮬레이션 상태 변경 반영
+  -------------------------------- */
   useEffect(() => {
-    let interval: ReturnType<typeof setInterval>;
-
     if (simulationMode === "danger") {
-      // Danger Mode: 88 ↔ 89 반복 (응급 경고 느낌)
       setPatientData(DANGER_DATA);
-      interval = setInterval(() => {
-        setPatientData((prev) => ({
-          ...prev,
-          spo2: prev.spo2 === 88 ? 89 : 88,
-        }));
-      }, 2000);
-    } else if (simulationMode === "warning") {
-      // Warning Mode: 93~91 사이에서 왔다갔다 (주의 신호)
-      const warningSequence = [93, 92, 91, 92, 93, 93];
-      let step = 0;
-
-      setPatientData((prev) => ({
-        ...SAFE_DATA,
-        spo2: warningSequence[0],
-      }));
-
-      interval = setInterval(() => {
-        step = (step + 1) % warningSequence.length;
-        setPatientData((prev) => ({
-          ...prev,
-          spo2: warningSequence[step],
-        }));
-      }, 1500);
     } else {
-      // Safe Mode: 98~95 범위에서 안정적으로 오르내리는 패턴
-      const sequence = [98, 97, 96, 95, 96, 97, 98];
-      let step = 0;
-
-      setPatientData({ ...SAFE_DATA, spo2: sequence[0] });
-
-      interval = setInterval(() => {
-        step = (step + 1) % sequence.length;
-        setPatientData((prev) => ({
-          ...prev,
-          spo2: sequence[step],
-        }));
-      }, 1200);
+      setPatientData(SAFE_DATA);
     }
-
-    return () => clearInterval(interval);
   }, [simulationMode]);
 
-  //    화면 이동 없음 (위험도 배지만 변경)
+  /* ------------------------------
+     환자 상태 토글
+  -------------------------------- */
   const togglePatientStatus = () => {
-    setSimulationMode((prev) =>
-      prev === "danger" ? "warning" : prev === "warning" ? "safe" : "danger"
-    );
+    setSimulationMode((prev) => (prev === "safe" ? "danger" : "safe"));
   };
 
-  // 화면 전환
+  /* ------------------------------
+     환아 이름 랜덤 변경
+  -------------------------------- */
+  const handleRandomizeChild = () => {
+    setChildName(pickRandomName());
+  };
+
+  /* ------------------------------
+     화면 이동 로직
+  -------------------------------- */
   const navigateTo = (screen: ScreenName) => {
     if (screen === "pro") {
-      setModalOpen(true); // PRO는 모달로 처리
+      setModalOpen(true);
       return;
     }
     setCurrentScreen(screen);
   };
 
-  // 현재 화면 렌더링
+  /* ------------------------------
+     화면 렌더링
+  -------------------------------- */
   const renderScreen = () => {
     switch (currentScreen) {
       case "emr":
@@ -128,6 +110,7 @@ const App: React.FC = () => {
             onRandomizeChild={handleRandomizeChild}
           />
         );
+
       case "triage":
         return (
           <TriageScreen
@@ -136,6 +119,7 @@ const App: React.FC = () => {
             onNavigate={navigateTo}
           />
         );
+
       case "ventilator":
         return (
           <VentilatorScreen
@@ -143,6 +127,25 @@ const App: React.FC = () => {
             onBack={() => navigateTo("emr")}
           />
         );
+
+      case "report":
+        return proData ? (
+          <ReportScreen
+            patientData={patientData}
+            childName={childName}
+            proData={proData}
+            onBack={() => navigateTo("emr")}
+          />
+        ) : (
+          <EmrScreen
+            patientData={patientData}
+            childName={childName}
+            onToggleStatus={togglePatientStatus}
+            onNavigate={navigateTo}
+            onRandomizeChild={handleRandomizeChild}
+          />
+        );
+
       default:
         return (
           <EmrScreen
@@ -156,15 +159,22 @@ const App: React.FC = () => {
     }
   };
 
+  /* ------------------------------
+     최종 렌더링
+  -------------------------------- */
   return (
     <Layout activeScreen={currentScreen} onNavigate={navigateTo}>
       {renderScreen()}
 
-      <Modal
+      {/* PRO 입력 모달 */}
+      <ProModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
-        title="상태 기록 (PRO)"
-        message="체온, 석션 횟수, 배변 양상 등을 기록하여 의료진과 공유합니다. (준비 중)"
+        onSubmit={(data) => {
+          setProData(data);
+          setModalOpen(false);
+          setCurrentScreen("report");
+        }}
       />
     </Layout>
   );

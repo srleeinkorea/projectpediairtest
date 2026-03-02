@@ -1,11 +1,5 @@
 // src/types.ts
- export type ScreenName =
-  | "emr"
-  | "triage"
-  | "ventilator"
-  | "pro";
-
-
+export type ScreenName = "emr" | "triage" | "ventilator" | "pro" | "report";
 
 export interface PatientData {
   name: string;
@@ -22,15 +16,15 @@ export interface PatientData {
   rate_setting: number;
   patient_rate: number;
   compliance: string;
-  guardianName: string; 
-} 
+  guardianName: string;
+}
 
 export interface ChatMessage {
   id: string;
-  role: 'user' | 'model';
+  role: "user" | "model";
   text: string;
   timestamp: Date;
-  feedback?: 'positive' | 'negative';
+  feedback?: "positive" | "negative";
 }
 
 export const DANGER_DATA: PatientData = {
@@ -47,7 +41,7 @@ export const DANGER_DATA: PatientData = {
   fio2_setting: 40,
   rate_setting: 20,
   patient_rate: 22,
-  compliance: "저하 (가래/폐쇄 의심)"
+  compliance: "저하 (가래/폐쇄 의심)",
 };
 
 export const SAFE_DATA: PatientData = {
@@ -64,5 +58,12 @@ export const SAFE_DATA: PatientData = {
   fio2_setting: 30,
   rate_setting: 20,
   patient_rate: 20, // Synchronized
-  compliance: "정상"
+  compliance: "정상",
 };
+export interface ProData {
+  temperature?: string;
+  suctionCount?: string;
+  stool?: string;
+  note?: string;
+  recordedAt: Date;
+}
